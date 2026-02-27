@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0f1e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>PharmaScan</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════ SPLASH ═══ -->
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-rx">Rx</div>
+    <div class="splash-name">PHARMASCAN</div>
+    <div class="splash-sub">Expiry Intelligence System</div>
+    <div class="splash-bar"><div class="splash-fill"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ APP ═══════ -->
+<div id="app" class="hidden">
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-left">
+      <span class="hdr-rx">Rx</span>
+      <span class="hdr-title">PHARMASCAN</span>
+    </div>
+    <div class="hdr-right">
+      <div class="hdr-stat" id="hdrExpired"><span class="hdr-stat-n" id="cntExpired">0</span><span class="hdr-stat-l">EXP</span></div>
+      <div class="hdr-stat warn" id="hdrExpiring"><span class="hdr-stat-n" id="cntExpiring">0</span><span class="hdr-stat-l">SOON</span></div>
+      <div class="hdr-stat ok" id="hdrOk"><span class="hdr-stat-n" id="cntOk">0</span><span class="hdr-stat-l">OK</span></div>
+      <button class="icon-btn" id="btnMenu">☰</button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── PAGE: SCAN ── -->
+    <section class="page active" id="pg-scan">
+
+      <!-- SCAN INPUT -->
+      <div class="scan-zone" id="scanZone">
+        <div class="scan-label">BARCODE / GS1</div>
+        <div class="scan-input-wrap">
+          <input id="barcodeInput" class="scan-input" type="text"
+            placeholder="Scan or paste barcode..."
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <button class="scan-cam-btn" id="btnCam" title="Camera">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </button>
+        </div>
+        <div id="reader" class="cam-reader hidden"></div>
+      </div>
+
+      <!-- PRODUCT RESULT PANEL -->
+      <div class="product-panel hidden" id="productPanel">
+        <div class="pp-header">
+          <div class="pp-match-badge" id="ppMatchBadge">MATCHED</div>
+          <button class="pp-close" id="ppClose">✕</button>
+        </div>
+        <div class="pp-name" id="ppName">—</div>
+        <div class="pp-gtin" id="ppGtin">—</div>
+
+        <!-- EXPIRY INPUT ROW -->
+        <div class="pp-expiry-row">
+          <div class="pp-field">
+            <label>EXPIRY DATE</label>
+            <input type="date" id="ppExpiry" class="pp-input">
+          </div>
+          <div class="pp-field">
+            <label>BATCH / LOT</label>
+            <input type="text" id="ppBatch" class="pp-input" placeholder="optional">
+          </div>
+        </div>
+        <div class="pp-expiry-row">
+          <div class="pp-field">
+            <label>QTY</label>
+            <input type="number" id="ppQty" class="pp-input" value="1" min="1">
+          </div>
+          <div class="pp-field">
+            <label>SUPPLIER</label>
+            <input type="text" id="ppSupplier" class="pp-input" placeholder="optional">
+          </div>
+        </div>
+
+        <!-- OCR BUTTON (shown for EAN-13 only) -->
+        <button class="ocr-btn hidden" id="btnOCR">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Scan Expiry from Label (OCR)
+        </button>
+        <div class="ocr-zone hidden" id="ocrZone">
+          <label class="ocr-upload-label">
+            <input type="file" id="ocrFile" accept="image/*" capture="environment">
+            📷 Take Photo or Upload Label Image
+          </label>
+          <div class="ocr-status" id="ocrStatus"></div>
+        </div>
+
+        <div class="pp-actions">
+          <button class="btn-save" id="btnSave">✓ SAVE ITEM</button>
+          <button class="btn-skip" id="btnSkip">Skip →</button>
+        </div>
+      </div>
+
+      <!-- RECENT -->
+      <div class="section-hdr">
+        <span>RECENT SCANS</span>
+        <button class="link-btn" onclick="showPage('pg-history')">All →</button>
+      </div>
+      <div id="recentList" class="items-list"></div>
+
+    </section>
+
+    <!-- ── PAGE: HISTORY ── -->
+    <section class="page" id="pg-history">
+      <div class="search-row">
+        <input class="search-input" id="searchInput" placeholder="Search name, GTIN, batch...">
+        <div class="filter-pills">
+          <button class="pill active" data-f="all">All</button>
+          <button class="pill" data-f="expired">Expired</button>
+          <button class="pill" data-f="expiring">Soon</button>
+          <button class="pill" data-f="ok">OK</button>
+          <button class="pill" data-f="unknown">No Expiry</button>
+        </div>
+      </div>
+      <div id="historyList" class="items-list"></div>
+    </section>
+
+    <!-- ── PAGE: MASTER ── -->
+    <section class="page" id="pg-master">
+      <div class="master-hero">
+        <div class="master-count" id="masterCount">0</div>
+        <div class="master-count-label">Products in Database</div>
+      </div>
+
+      <div class="card">
+        <div class="card-ttl">📥 Upload Master CSV</div>
+        <p class="card-desc">Columns: <code>barcode, name, rms</code> (tab or comma)</p>
+        <button class="btn-primary" onclick="document.getElementById('fileMaster').click()">Choose File (Replace)</button>
+        <button class="btn-secondary" onclick="document.getElementById('fileAppend').click()">Choose File (Append)</button>
+        <input type="file" id="fileMaster" accept=".csv,.txt,.xlsx" hidden>
+        <input type="file" id="fileAppend" accept=".csv,.txt,.xlsx" hidden>
+      </div>
+
+      <div class="card">
+        <div class="card-ttl">📄 Template</div>
+        <div class="template-box"><code>barcode,name,rms
+06291107439358,Zyrtec 75ml,220155756
+00840149658430,Viagra 100mg 4s,220153086</code></div>
+        <button class="btn-outline" onclick="downloadTemplate()">Download Template</button>
+      </div>
+
+      <div class="card danger-card">
+        <div class="card-ttl">⚠ Reset</div>
+        <button class="btn-danger" onclick="resetMaster()">Clear All Master Data</button>
+      </div>
+    </section>
+
+    <!-- ── PAGE: EXPORT ── -->
+    <section class="page" id="pg-export">
+      <div class="card">
+        <div class="card-ttl">📊 Export Scanned Data</div>
+        <p class="card-desc">Download all scanned items as CSV for reporting</p>
+        <button class="btn-primary" onclick="exportCSV()">Export CSV</button>
+      </div>
+      <div class="card">
+        <div class="card-ttl">💾 Backup & Restore</div>
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="downloadBackup()">Download Backup</button>
+          <button class="btn-secondary" onclick="document.getElementById('fileRestore').click()">Restore</button>
+        </div>
+        <input type="file" id="fileRestore" accept=".json" hidden>
+      </div>
+      <div class="card danger-card">
+        <div class="card-ttl">🗑 Clear History</div>
+        <button class="btn-danger" onclick="clearAllHistory()">Clear All Scanned Items</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnav">
+    <button class="bnav-btn active" data-page="pg-scan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Scan</span>
+    </button>
+    <button class="bnav-btn" data-page="pg-history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>History</span>
+    </button>
+    <button class="bnav-btn" data-page="pg-master">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      <span>Master</span>
+    </button>
+    <button class="bnav-btn" data-page="pg-export">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Export</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- EDIT MODAL -->
+<div class="modal-bg hidden" id="editModal">
+  <div class="modal">
+    <div class="modal-hdr"><span>Edit Item</span><button onclick="closeEditModal()">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="eId">
+      <div class="form-row"><label>Name</label><input id="eName" class="form-input"></div>
+      <div class="form-row"><label>GTIN</label><input id="eGtin" class="form-input" readonly></div>
+      <div class="form-row"><label>Expiry</label><input type="date" id="eExpiry" class="form-input"></div>
+      <div class="form-row"><label>Batch</label><input id="eBatch" class="form-input"></div>
+      <div class="form-row2">
+        <div class="form-row"><label>Qty</label><input type="number" id="eQty" class="form-input" min="1"></div>
+        <div class="form-row"><label>RMS</label><input id="eRms" class="form-input"></div>
+      </div>
+      <div class="form-row"><label>Supplier</label><input id="eSupplier" class="form-input"></div>
+      <div class="form-row">
+        <label>Returnable</label>
+        <select id="eReturnable" class="form-input">
+          <option value="">—</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<!-- LOADING -->
+<div class="loading-overlay hidden" id="loading">
+  <div class="spinner"></div>
+  <div id="loadingText">Loading...</div>
+</div>
+
+<!-- LIBS -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://unpkg.com/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
