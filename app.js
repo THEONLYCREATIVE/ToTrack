@@ -121,7 +121,7 @@ const GS1 = {
       // ── Parenthesised: (01)XXXXXX(17)YYMMDD(10)BATCH ──
       const g = code.match(/\(01\)(\d{14})/);   if (g) result.gtin  = g[1];
       const e = code.match(/\(17\)(\d{6})/);    if (e) this._expiry(e[1], result);
-      const b = code.match(/\(10\)([^(]+)/);    if (b) result.batch  = b[1].replace(/[^\x20-\x7E]/g,'').trim().substring(0,20);
+      const b = code.match(/\(10\)([^(]+)/);    if (b) result.batch  = b[1].replace(/[^\x20-\x7E]/g,'').trim().substring(0,6);
       const s = code.match(/\(21\)([^(]+)/);    if (s) result.serial = s[1].replace(/[^\x20-\x7E]/g,'').trim().substring(0,20);
     } else {
       // ── Raw concatenated: 01GTIN17YYMMDD<GS>10BATCH ──
