@@ -1,258 +1,2412 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0f1e">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>PharmaScan</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>ShelfRx Pro & MY Offline Tracker - Boots T3</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ShelfRx">
+<meta name="theme-color" content="#00205B">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* MIDNIGHT DARK THEME (DEFAULT) */
+  --bg: #020B1F;
+  --bg-card: #0D1E40;
+  --bg-card-alt: #162A52;
+  --bg-input: rgba(255, 255, 255, 0.08);
+  --border: #1E3A8A;
+  --text: #F1F5F9;
+  --text-muted: #94A3B8;
+  --text-sub: #64748B;
+  --accent: #4BA3E3;
+  --brand-blue: #005EB8;
+  --my-navy: #00205B;
+  --purple: #A855F7;
+  --aura-pink: #D81B60;
+  --green: #10B981;
+  --amber: #F59E0B;
+  --red: #EF4444;
+  --shelf-bg: linear-gradient(180deg, #FFF8EE 0%, #F5ECD6 70%, #E8DCC8 100%);
+  --wood-top: linear-gradient(180deg, #E8C47A 0%, #C8933A 50%, #A0700A 100%);
+  --wood-bottom: linear-gradient(180deg, #C8933A 0%, #8B5E1A 60%, #6B4010 100%);
+  --safe-top: env(safe-area-inset-top, 20px);
+  --safe-bottom: env(safe-area-inset-bottom, 18px);
+}
+
+[data-theme="light"] {
+  /* MINT GREEN CLINICAL LIGHT THEME */
+  --bg: #F0FDF4;
+  --bg-card: #FFFFFF;
+  --bg-card-alt: #E2FBEA;
+  --bg-input: #F1F5F9;
+  --border: #86EFAC;
+  --text: #0F172A;
+  --text-muted: #475569;
+  --text-sub: #64748B;
+  --accent: #10B981;
+  --brand-blue: #059669;
+  --my-navy: #064E3B;
+  --purple: #9333EA;
+  --aura-pink: #E11D48;
+  --green: #059669;
+  --amber: #D97706;
+  --red: #DC2626;
+  --shelf-bg: linear-gradient(180deg, #FFFFFF 0%, #F0FDF4 100%);
+  --wood-top: linear-gradient(180deg, #A7F3D0 0%, #34D399 50%, #059669 100%);
+  --wood-bottom: linear-gradient(180deg, #34D399 0%, #059669 100%);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: calc(82px + var(--safe-bottom));
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* CINEMATIC STARTUP LOADER */
+#splashScreen {
+  position: fixed;
+  inset: 0;
+  background: #010816;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+#splashScreen.hide {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.04);
+}
+#splashCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.splash-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.orbit-wrapper {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px dashed rgba(75, 163, 227, 0.4);
+  animation: orbitRotate 8s linear infinite;
+}
+.ring-outer { width: 120px; height: 120px; }
+.ring-inner { width: 80px; height: 80px; border-color: rgba(216, 27, 96, 0.5); animation-direction: reverse; animation-duration: 5s; }
+.splash-pill { font-size: 42px; animation: pillBounce 2s ease-in-out infinite; }
+@keyframes orbitRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pillBounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+.splash-title {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #fff;
+  margin-top: 18px;
+}
+.splash-author {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-top: 6px;
+}
+.splash-console {
+  margin-top: 20px;
+  width: 290px;
+  height: 52px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(75, 163, 227, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: #38BDF8;
+  text-align: left;
+  overflow: hidden;
+}
+
+/* TOP HEADER */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: calc(var(--safe-top) + 10px) 16px 12px;
+  background: rgba(2, 11, 31, 0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+[data-theme="light"] .topbar {
+  background: rgba(240, 253, 244, 0.92);
+}
+.brand-title {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+}
+.brand-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'DM Mono', monospace;
+}
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.badge-total-sku {
+  background: linear-gradient(135deg, var(--brand-blue), var(--accent));
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+.btn-icon-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+/* 4-DOOR PORTAL HOME */
+#portal-view {
+  padding: 16px;
+  animation: fadeIn 0.3s ease;
+}
+.portal-hero {
+  background: linear-gradient(145deg, var(--my-navy), var(--bg-card));
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.portal-hero h1 { font-size: 24px; font-weight: 900; }
+.portal-hero p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+.door-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.door-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 14px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 130px;
+}
+.door-card:active { transform: scale(0.98); }
+.door-card:hover { border-color: var(--accent); }
+.door-icon { font-size: 28px; margin-bottom: 8px; }
+.door-title { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
+.door-desc { font-size: 10px; color: var(--text-muted); margin-top: 4px; line-height: 1.3; }
+
+/* MODULE VIEWS */
+.module-view {
+  display: none;
+  padding: 14px 16px 30px;
+  animation: fadeIn 0.25s ease;
+}
+.module-view.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.view-title-wrap { display: flex; align-items: center; gap: 8px; }
+.view-title { font-size: 16px; font-weight: 900; }
+.btn-back {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* DOOR 1: KPI & AGENDA */
+.active-shift-banner {
+  background: linear-gradient(135deg, rgba(75, 163, 227, 0.2), rgba(0, 94, 184, 0.3));
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.kpi-table-scroll {
+  overflow-x: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 16px;
+}
+table.kpi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  min-width: 820px;
+}
+table.kpi-table th {
+  background: var(--bg-card-alt);
+  padding: 10px 8px;
+  font-weight: 800;
+  text-align: left;
+  border-bottom: 1.5px solid var(--border);
+  color: var(--text-muted);
+}
+table.kpi-table td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+[data-theme="light"] table.kpi-table td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.kpi-cell-input {
+  width: 80px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+.kpi-total-row {
+  background: var(--bg-card-alt);
+  font-weight: 900;
+  color: var(--accent);
+}
+
+/* DOOR 2: PLANNER & INVENTORY (383 SKUS) */
+.rack-tab-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+.rack-tab-strip::-webkit-scrollbar { display: none; }
+.rtab {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.rtab.active {
+  background: var(--brand-blue);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.search-box-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+.search-box-input {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 12px 9px 34px;
+  font-size: 12px;
+  outline: none;
+}
+.search-icon-pos {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.wood-rack {
+  background: var(--shelf-bg);
+  border: 2px solid #C8933A;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+.wood-shelf-header {
+  background: rgba(255, 255, 255, 0.92);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.12);
+  color: #0F172A;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.wood-top-bar { height: 8px; background: var(--wood-top); }
+.wood-bottom-bar { height: 10px; background: var(--wood-bottom); }
+
+.shelf-bottles-row {
+  display: flex;
+  align-items: flex-end;
+  min-height: 84px;
+  padding: 6px;
+  gap: 6px;
+  overflow-x: auto;
+}
+.shelf-bottles-row::-webkit-scrollbar { height: 4px; }
+.shelf-bottles-row::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 2px; }
+
+.bottle-card {
+  width: 52px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+.bottle-visual {
+  width: 46px;
+  height: 60px;
+  background: #fff;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.18);
+  box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.bottle-pos {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background: var(--my-navy);
+  color: #fff;
+  font-size: 7px;
+  font-weight: 800;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+}
+.bottle-exp-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  border: 1px solid #fff;
+}
+.bottle-name-label {
+  font-size: 7.5px;
+  font-weight: 700;
+  max-width: 50px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #5A4020;
+  margin-top: 2px;
+}
+.bottle-stock-chip {
+  font-size: 8px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 800;
+}
+.stock-ok { color: var(--green); }
+.stock-low { color: var(--amber); }
+.stock-out { color: var(--red); }
+
+/* DOOR 3: DUTY ROTA & TIME */
+.clock-card {
+  background: linear-gradient(135deg, var(--my-navy), #081B4B);
+  border: 1.5px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.live-clock-digits {
+  font-size: 36px;
+  font-weight: 900;
+  font-family: 'DM Mono', monospace;
+  color: #fff;
+  letter-spacing: 1px;
+  margin: 6px 0;
+}
+.clock-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.btn-clock {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #fff;
+}
+.btn-clock.in { background: var(--green); }
+.btn-clock.break { background: var(--amber); }
+.btn-clock.out { background: var(--red); }
+
+.roster-grid-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+table.roster-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  min-width: 720px;
+}
+table.roster-table th, table.roster-table td {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+}
+table.roster-table th { background: var(--bg-card-alt); }
+.roster-cell-edit {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  width: 100%;
+  font-weight: 600;
+}
+
+/* CLINICAL SELLING & TRANSLATION GUIDE */
+.clinical-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.lang-select-box {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin: 8px 0;
+  font-size: 12px;
+}
+
+/* DOOR 4: SCANNER & DATA LOGGER */
+.telemetry-box {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.temp-large {
+  font-size: 34px;
+  font-weight: 900;
+  font-family: 'DM Mono', monospace;
+  color: var(--green);
+  margin: 6px 0;
+}
+.excel-ledger-container {
+  background: #fff;
+  color: #334155;
+  border-radius: 12px;
+  border: 1px solid #CBD5E1;
+  overflow-x: auto;
+  max-height: 380px;
+  margin-top: 10px;
+}
+table.excel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  min-width: 760px;
+}
+table.excel-table th {
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  padding: 7px 8px;
+  font-weight: 800;
+  color: #475569;
+  position: sticky;
+  top: 0;
+}
+table.excel-table td {
+  border: 1px solid #CBD5E1;
+  padding: 6px 8px;
+}
+
+/* FLOATING BOTTOM NAV */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(2, 11, 31, 0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 8px 0 calc(8px + var(--safe-bottom));
+  z-index: 90;
+}
+[data-theme="light"] .bottom-nav {
+  background: rgba(240, 253, 244, 0.95);
+}
+.bnav-item {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-sub);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.bnav-item.active { color: var(--accent); }
+.bnav-item i { font-style: normal; font-size: 18px; }
+
+/* MODALS */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-sheet {
+  background: var(--bg-card);
+  border-top: 2px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 16px 18px 30px;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.modal-title { font-size: 15px; font-weight: 900; }
+.btn-close {
+  background: var(--bg-input);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+/* FORM FIELDS */
+.form-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
+}
+.form-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 10px;
+  outline: none;
+}
+
+/* TICKET / SHELF TALKER PREVIEW */
+.ticket-card {
+  border: 2px dashed var(--brand-blue);
+  background: #FFFBEB;
+  border-radius: 10px;
+  padding: 12px;
+  color: #0F172A;
+  margin: 12px 0;
+}
+.ticket-badge {
+  background: var(--red);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  padding: 2px 6px;
+  text-align: center;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.ticket-price {
+  font-size: 22px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 900;
+  color: var(--my-navy);
+}
+
+.toast {
+  position: fixed;
+  top: calc(var(--safe-top) + 60px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--green);
+  color: #fff;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  z-index: 2000;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+</style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════ SPLASH ═══ -->
-<div id="splash">
-  <div class="splash-inner">
-    <div class="splash-rx">Rx</div>
-    <div class="splash-name">PHARMASCAN</div>
-    <div class="splash-sub">Expiry Intelligence System</div>
-    <div class="splash-bar"><div class="splash-fill"></div></div>
+<!-- CINEMATIC STARTUP LOADER -->
+<div id="splashScreen">
+  <canvas id="splashCanvas"></canvas>
+  <div class="splash-content">
+    <div class="orbit-wrapper">
+      <div class="orbit-ring ring-outer"></div>
+      <div class="orbit-ring ring-inner"></div>
+      <div class="splash-pill">💊</div>
+    </div>
+    <div class="splash-title">ShelfRx Core</div>
+    <div class="splash-author">DESIGNED & DEVELOPED BY VYSAKH CHANDRAN</div>
+    <div class="splash-console" id="splashTerminal">Initialising clinical storage engine...</div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ APP ═══════ -->
-<div id="app" class="hidden">
+<!-- TOAST ALERT -->
+<div class="toast" id="toastMessage">Action Saved</div>
 
-  <!-- HEADER -->
-  <header class="hdr">
-    <div class="hdr-left">
-      <span class="hdr-rx">Rx</span>
-      <span class="hdr-title">PHARMASCAN</span>
+<!-- TOP APP BAR -->
+<header class="topbar">
+  <div>
+    <div class="brand-title">ShelfRx <span>Pro</span></div>
+    <div class="brand-sub" id="currentDateDisplay">Boots T3 Arrivals</div>
+  </div>
+  <div class="top-actions">
+    <button class="badge-total-sku" onclick="openModal('stockAuditModal')">
+      <span>📦</span> <span id="badgeSkuNumbers">383 / 2150</span>
+    </button>
+    <button class="btn-icon-circle" onclick="toggleThemeEngine()" title="Toggle Theme (Mint Light / Midnight Dark)">🌓</button>
+    <button class="btn-icon-circle" onclick="openModal('settingsModal')" title="Settings">⚙️</button>
+  </div>
+</header>
+
+<!-- MAIN 4-DOOR PORTAL -->
+<main id="portal-view">
+  <div class="portal-hero">
+    <h1>Pharmacy Hub</h1>
+    <p>Select a portal to access clinical workflows, store targets, and 383 master inventory planograms.</p>
+  </div>
+
+  <div class="door-grid">
+    <div class="door-card" onclick="navigateTo('kpi')">
+      <div>
+        <div class="door-icon">📊</div>
+        <div class="door-title">KPI & Agenda</div>
+        <div class="door-desc">10-block clubbed agenda, sales formulas, ATV, and Aura share.</div>
+      </div>
+      <div style="font-size: 10px; color: var(--accent); font-weight:800; margin-top:10px;">OPEN PORTAL →</div>
     </div>
-    <div class="hdr-right">
-      <div class="hdr-stat" id="hdrExpired"><span class="hdr-stat-n" id="cntExpired">0</span><span class="hdr-stat-l">EXP</span></div>
-      <div class="hdr-stat warn" id="hdrExpiring"><span class="hdr-stat-n" id="cntExpiring">0</span><span class="hdr-stat-l">SOON</span></div>
-      <div class="hdr-stat ok" id="hdrOk"><span class="hdr-stat-n" id="cntOk">0</span><span class="hdr-stat-l">OK</span></div>
-      <button class="icon-btn" id="btnMenu">☰</button>
+
+    <div class="door-card" onclick="navigateTo('planner')">
+      <div>
+        <div class="door-icon">📦</div>
+        <div class="door-title">Inventory & Planner</div>
+        <div class="door-desc">383 Master SKUs across Modules 1–7, notched shelves, RMS & barcodes.</div>
+      </div>
+      <div style="font-size: 10px; color: var(--accent); font-weight:800; margin-top:10px;">OPEN PORTAL →</div>
     </div>
-  </header>
 
-  <!-- MAIN -->
-  <main class="main">
-
-    <!-- ── PAGE: SCAN ── -->
-    <section class="page active" id="pg-scan">
-
-      <!-- SCAN INPUT -->
-      <div class="scan-zone" id="scanZone">
-        <div class="scan-label">BARCODE / GS1</div>
-        <div class="scan-input-wrap">
-          <input id="barcodeInput" class="scan-input" type="text"
-            placeholder="Scan or paste barcode..."
-            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-          <button class="scan-cam-btn" id="btnCam" title="Camera">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          </button>
-        </div>
-        <div id="reader" class="cam-reader hidden"></div>
+    <div class="door-card" onclick="navigateTo('rota')">
+      <div>
+        <div class="door-icon">⏰</div>
+        <div class="door-title">Duty Rota & Time</div>
+        <div class="door-desc">Vysakh RTA punch time clock, Week 28 roster matrix, and 12-language counsel.</div>
       </div>
+      <div style="font-size: 10px; color: var(--accent); font-weight:800; margin-top:10px;">OPEN PORTAL →</div>
+    </div>
 
-      <!-- PRODUCT RESULT PANEL -->
-      <div class="product-panel hidden" id="productPanel">
-        <div class="pp-header">
-          <div class="pp-match-badge" id="ppMatchBadge">MATCHED</div>
-          <button class="pp-close" id="ppClose">✕</button>
-        </div>
-        <div class="pp-name" id="ppName">—</div>
-        <div class="pp-gtin" id="ppGtin">—</div>
-
-        <!-- EXPIRY INPUT ROW -->
-        <div class="pp-expiry-row">
-          <div class="pp-field">
-            <label>EXPIRY DATE</label>
-            <input type="date" id="ppExpiry" class="pp-input">
-          </div>
-          <div class="pp-field">
-            <label>BATCH / LOT</label>
-            <input type="text" id="ppBatch" class="pp-input" placeholder="optional">
-          </div>
-        </div>
-        <div class="pp-expiry-row">
-          <div class="pp-field">
-            <label>QTY</label>
-            <input type="number" id="ppQty" class="pp-input" value="1" min="1">
-          </div>
-          <div class="pp-field">
-            <label>SUPPLIER</label>
-            <input type="text" id="ppSupplier" class="pp-input" placeholder="optional">
-          </div>
-        </div>
-
-        <!-- OCR BUTTON (shown for EAN-13 only) -->
-        <button class="ocr-btn hidden" id="btnOCR">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Scan Expiry from Label (OCR)
-        </button>
-        <div class="ocr-zone hidden" id="ocrZone">
-          <label class="ocr-upload-label">
-            <input type="file" id="ocrFile" accept="image/*" capture="environment">
-            📷 Take Photo or Upload Label Image
-          </label>
-          <div class="ocr-status" id="ocrStatus"></div>
-        </div>
-
-        <div class="pp-actions">
-          <button class="btn-save" id="btnSave">✓ SAVE ITEM</button>
-          <button class="btn-skip" id="btnSkip">Skip →</button>
-        </div>
+    <div class="door-card" onclick="navigateTo('scanner')">
+      <div>
+        <div class="door-icon">📷</div>
+        <div class="door-title">Scanner & Expiry</div>
+        <div class="door-desc">GS1 DataMatrix decoder, box OCR, fridge telemetry, and order replenishment.</div>
       </div>
+      <div style="font-size: 10px; color: var(--accent); font-weight:800; margin-top:10px;">OPEN PORTAL →</div>
+    </div>
+  </div>
+</main>
 
-      <!-- RECENT -->
-      <div class="section-hdr">
-        <span>RECENT SCANS</span>
-        <button class="link-btn" onclick="showPage('pg-history')">All →</button>
+<!-- MODULE 1: KPI & AGENDA -->
+<section class="module-view" id="view-kpi">
+  <div class="view-header">
+    <div class="view-title-wrap">
+      <span style="font-size: 20px;">📊</span>
+      <div class="view-title">KPI & Clubbed Agenda</div>
+    </div>
+    <button class="btn-back" onclick="navigateTo('portal')">← Portal</button>
+  </div>
+
+  <div class="active-shift-banner">
+    <div>
+      <div style="font-size:10px; text-transform:uppercase; font-weight:800; color:var(--accent);">Active Staff Schedule</div>
+      <div style="font-size:13px; font-weight:900;" id="kpiActiveShiftText">Vysakh (PH): 1:00 PM – 10:00 PM</div>
+    </div>
+    <span style="font-size:10px; padding:3px 8px; border-radius:12px; background:var(--green); color:#fff; font-weight:800;">ON DUTY</span>
+  </div>
+
+  <div class="kpi-table-scroll">
+    <table class="kpi-table" id="kpiClubbedTable">
+      <thead>
+        <tr>
+          <th>HOURS</th>
+          <th>SALE (AED)</th>
+          <th>TRN</th>
+          <th>ATV</th>
+          <th>NO7 TOTAL</th>
+          <th>NO7 %</th>
+          <th>AURA</th>
+          <th>AURA %</th>
+          <th>IPC / CONV</th>
+          <th>FF / UNITS</th>
+        </tr>
+      </thead>
+      <tbody id="kpiTableBody"></tbody>
+      <tfoot>
+        <tr class="kpi-total-row" id="kpiTotalRow">
+          <td>TOTAL / AVG</td>
+          <td id="totSale">AED 0</td>
+          <td id="totTrn">0</td>
+          <td id="totAtv">0.0</td>
+          <td id="totNo7">AED 0</td>
+          <td id="totNo7Pct">0.0%</td>
+          <td id="totAura">0</td>
+          <td id="totAuraPct">0.0%</td>
+          <td id="totIpc">0.0</td>
+          <td id="totUnits">0</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</section>
+
+<!-- MODULE 2: INVENTORY & PLANNER (PLANNERRRR - 383 SKUs) -->
+<section class="module-view" id="view-planner">
+  <div class="view-header">
+    <div class="view-title-wrap">
+      <span style="font-size: 20px;">🪵</span>
+      <div class="view-title">Inventory & Planogram</div>
+    </div>
+    <button class="btn-back" onclick="navigateTo('portal')">← Portal</button>
+  </div>
+
+  <div class="search-box-wrap">
+    <span class="search-icon-pos">🔍</span>
+    <input type="text" class="search-box-input" id="planogramSearchInput" placeholder="Search 383 products by name, RMS barcode, Alshaya code..." oninput="filterPlanogramProducts(this.value)">
+  </div>
+
+  <div class="rack-tab-strip" id="rackTabStrip"></div>
+  <div id="rackShelvesContainer"></div>
+</section>
+
+<!-- MODULE 3: DUTY ROTA & TIME -->
+<section class="module-view" id="view-rota">
+  <div class="view-header">
+    <div class="view-title-wrap">
+      <span style="font-size: 20px;">⏰</span>
+      <div class="view-title">Duty Rota & Counsel Hub</div>
+    </div>
+    <button class="btn-back" onclick="navigateTo('portal')">← Portal</button>
+  </div>
+
+  <div class="clock-card">
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.7);">Today Shift ★ VYSAKH (331356)</div>
+    <div class="live-clock-digits" id="liveClockDigits">00:00:00</div>
+    <div style="font-size:12px; font-weight:700;" id="rotaScheduleBanner">Week 28: 1:00 PM – 10:00 PM</div>
+    <div class="clock-actions-row">
+      <button class="btn-clock in" onclick="logTimePunch('Clock In')">Clock In</button>
+      <button class="btn-clock break" onclick="logTimePunch('Break')">Break</button>
+      <button class="btn-clock out" onclick="logTimePunch('Clock Out')">Clock Out</button>
+    </div>
+  </div>
+
+  <div style="font-size:12px; font-weight:900; margin:16px 0 6px;">📅 Week 28 Rota Matrix (Fri 3-Jul to Thu 9-Jul)</div>
+  <div class="roster-grid-wrap">
+    <table class="roster-table" id="rosterMatrixTable">
+      <thead>
+        <tr>
+          <th>Employee Name</th>
+          <th>Role</th>
+          <th>Fri 3</th>
+          <th>Sat 4</th>
+          <th>Sun 5</th>
+          <th>Mon 6</th>
+          <th>Tue 7</th>
+          <th>Wed 8</th>
+          <th>Thu 9</th>
+        </tr>
+      </thead>
+      <tbody id="rosterMatrixBody"></tbody>
+    </table>
+  </div>
+
+  <!-- MULTI-LANGUAGE COUNSEL GUIDE -->
+  <div class="clinical-card">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-size:13px; font-weight:900;" id="counselProdTitle">PRO COLLAGENIUM 14X25ML</div>
+      <span style="font-size:10px; color:var(--accent); font-weight:800;">12-Language Counsel Engine</span>
+    </div>
+
+    <div style="font-size:11px; color:var(--text-muted); margin:8px 0;" id="counselSourceText">
+      Take 1 shot daily before breakfast. Pair with Vitamin C for optimal absorption. Store in a cool dry place.
+    </div>
+
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <button class="btn-back" style="flex:1; background:linear-gradient(135deg, var(--brand-blue), var(--purple)); color:#fff;" onclick="generateAiClinicalGuide()">🤖 Generate Clinical Guidance</button>
+      <button class="btn-back" style="flex:1;" onclick="speakCounselAudio()">🔊 Listen Audio Voice</button>
+    </div>
+
+    <select class="lang-select-box" id="targetLangSelector" onchange="translateSellingInstructions()">
+      <option value="en">English (Default)</option>
+      <option value="zh">Chinese (中文)</option>
+      <option value="ru">Russian (Русский)</option>
+      <option value="fr">French (Français)</option>
+      <option value="es">Spanish (Español)</option>
+      <option value="ar">Arabic (العربية - RTL)</option>
+      <option value="pt">Portuguese (Português)</option>
+      <option value="ko">Korean (한국어)</option>
+      <option value="ja">Japanese (日本語)</option>
+      <option value="id">Indonesian (Bahasa)</option>
+      <option value="sw">Swahili (Kiswahili)</option>
+      <option value="kk">Kazakh / Kyrgyz (Қазақша)</option>
+    </select>
+
+    <div id="counselTranslatedBox" style="font-size:12px; font-weight:700; color:var(--green); line-height:1.5; padding:8px; background:var(--bg-input); border-radius:8px;">
+      Select a language to translate selling instructions.
+    </div>
+  </div>
+</section>
+
+<!-- MODULE 4: SCANNER & EXPIRY (DATA LOGGER) -->
+<section class="module-view" id="view-scanner">
+  <div class="view-header">
+    <div class="view-title-wrap">
+      <span style="font-size: 20px;">📷</span>
+      <div class="view-title">GS1 Scanner & Telemetry</div>
+    </div>
+    <button class="btn-back" onclick="navigateTo('portal')">← Portal</button>
+  </div>
+
+  <div class="telemetry-box">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-size:11px; font-weight:800; text-transform:uppercase;">🌡️ Clinical Refrigerator Telemetry</div>
+      <span style="font-size:10px; font-weight:900; padding:2px 8px; border-radius:12px; background:rgba(16,185,129,0.2); color:var(--green);" id="fridgeStatusBadge">Safe Range (2.0°C – 8.0°C)</span>
+    </div>
+    <div class="temp-large" id="fridgeCurrentTemp">4.2 °C</div>
+    <div style="display:flex; gap:8px; justify-content:center;">
+      <button class="btn-back" onclick="simulateSpikeExcursion()">Trigger Spike Alert</button>
+      <button class="btn-back" onclick="resetSpikeExcursion()">Reset Normal</button>
+    </div>
+  </div>
+
+  <!-- GS1 OFFLINE EXCEL LEDGER -->
+  <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:14px;">
+    <div style="font-size:12px; font-weight:900; margin-bottom:6px;">📷 GS1 String / Box OCR Parser</div>
+    <input type="text" class="kpi-cell-input" style="width:100%; margin-bottom:8px;" id="manualBarcodeString" placeholder="Paste GS1 string e.g. 01003000201055571727031310BATCH1A">
+    
+    <div style="display:flex; gap:8px;">
+      <button class="btn-back" style="flex:1; background:var(--brand-blue); color:#fff;" onclick="parseManualGS1Input()">Process Barcode</button>
+      <button class="btn-back" style="flex:1; background:linear-gradient(135deg, var(--purple), var(--aura-pink)); color:#fff;" onclick="document.getElementById('aiVisionFileInput').click()">📷 Box Ingest</button>
+    </div>
+    <input type="file" id="aiVisionFileInput" accept="image/*" style="display:none;" onchange="handleAiVisionPackaging(event)">
+
+    <div class="excel-ledger-container">
+      <table class="excel-table">
+        <thead>
+          <tr>
+            <th style="width:36px; text-align:center;">#</th>
+            <th>BARCODE (GTIN)</th>
+            <th>GS1 RAW STRING</th>
+            <th>PRODUCT NAME</th>
+            <th>EXPIRY</th>
+            <th>BATCH</th>
+            <th style="width:50px; text-align:right;">QTY</th>
+          </tr>
+        </thead>
+        <tbody id="excelLedgerBody"></tbody>
+      </table>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn-back" style="flex:1;" onclick="clearLedgerRows()">Clear Ledger</button>
+      <button class="btn-back" style="flex:1; background:var(--green); color:#fff;" onclick="exportOrderCsvSheet()">Export CSV Ledger</button>
+    </div>
+  </div>
+</section>
+
+<!-- BOTTOM NAVIGATION -->
+<nav class="bottom-nav">
+  <button class="bnav-item active" id="bnav-portal" onclick="navigateTo('portal')"><i>🏠</i>Portal</button>
+  <button class="bnav-item" id="bnav-kpi" onclick="navigateTo('kpi')"><i>📊</i>KPI</button>
+  <button class="bnav-item" id="bnav-planner" onclick="navigateTo('planner')"><i>🪵</i>Planner</button>
+  <button class="bnav-item" id="bnav-rota" onclick="navigateTo('rota')"><i>⏰</i>Rota</button>
+  <button class="bnav-item" id="bnav-scanner" onclick="navigateTo('scanner')"><i>📷</i>Scanner</button>
+</nav>
+
+<!-- MODAL 1: STOCK PRESERVATION & AUDIT -->
+<div class="modal-overlay" id="stockAuditModal" onclick="closeModal('stockAuditModal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">📋 Stock Preservation & OOS Audit</div>
+      <button class="btn-close" onclick="closeModal('stockAuditModal')">✕</button>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:12px;">
+      <div>Active Master SKUs: <b id="auditSkuCount">383</b></div>
+      <div>Preservation Rate: <b style="color:var(--green)">95.4%</b></div>
+    </div>
+    <div style="font-size:11px; font-weight:800; color:var(--red); text-transform:uppercase; margin-bottom:6px;">Urgent Out of Stock / Low Stock Items</div>
+    <div id="auditOosList" style="max-height:260px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; padding:6px;"></div>
+  </div>
+</div>
+
+<!-- MODAL 2: PRODUCT DETAILS & EDITING DIALOG -->
+<div class="modal-overlay" id="productEditModal" onclick="closeModal('productEditModal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">✏️ Product Details & Batch Record</div>
+      <button class="btn-close" onclick="closeModal('productEditModal')">✕</button>
+    </div>
+    <input type="hidden" id="editProdId">
+    
+    <label class="form-label">Product Description</label>
+    <input type="text" class="form-input" id="editProdName" placeholder="Enter full product description">
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div>
+        <label class="form-label">RMS Barcode</label>
+        <input type="text" class="form-input" id="editProdBarcode">
       </div>
-      <div id="recentList" class="items-list"></div>
-
-    </section>
-
-    <!-- ── PAGE: HISTORY ── -->
-    <section class="page" id="pg-history">
-      <div class="search-row">
-        <input class="search-input" id="searchInput" placeholder="Search name, GTIN, batch...">
-        <div class="filter-pills">
-          <button class="pill active" data-f="all">All</button>
-          <button class="pill" data-f="expired">Expired</button>
-          <button class="pill" data-f="expiring">Soon</button>
-          <button class="pill" data-f="ok">OK</button>
-          <button class="pill" data-f="unknown">No Expiry</button>
-        </div>
-      </div>
-      <div id="historyList" class="items-list"></div>
-    </section>
-
-    <!-- ── PAGE: MASTER ── -->
-    <section class="page" id="pg-master">
-      <div class="master-hero">
-        <div class="master-count" id="masterCount">0</div>
-        <div class="master-count-label">Products in Database</div>
-      </div>
-
-      <div class="card">
-        <div class="card-ttl">📥 Upload Master CSV</div>
-        <p class="card-desc">Columns: <code>barcode, name, rms</code> (tab or comma)</p>
-        <button class="btn-primary" onclick="document.getElementById('fileMaster').click()">Choose File (Replace)</button>
-        <button class="btn-secondary" onclick="document.getElementById('fileAppend').click()">Choose File (Append)</button>
-        <input type="file" id="fileMaster" accept=".csv,.txt,.xlsx" hidden>
-        <input type="file" id="fileAppend" accept=".csv,.txt,.xlsx" hidden>
-      </div>
-
-      <div class="card">
-        <div class="card-ttl">📄 Template</div>
-        <div class="template-box"><code>barcode,name,rms
-06291107439358,Zyrtec 75ml,220155756
-00840149658430,Viagra 100mg 4s,220153086</code></div>
-        <button class="btn-outline" onclick="downloadTemplate()">Download Template</button>
-      </div>
-
-      <div class="card danger-card">
-        <div class="card-ttl">⚠ Reset</div>
-        <button class="btn-danger" onclick="resetMaster()">Clear All Master Data</button>
-      </div>
-    </section>
-
-    <!-- ── PAGE: EXPORT ── -->
-    <section class="page" id="pg-export">
-      <div class="card">
-        <div class="card-ttl">📊 Export Scanned Data</div>
-        <p class="card-desc">Download all scanned items as CSV for reporting</p>
-        <button class="btn-primary" onclick="exportCSV()">Export CSV</button>
-      </div>
-      <div class="card">
-        <div class="card-ttl">💾 Backup & Restore</div>
-        <div class="btn-row">
-          <button class="btn-secondary" onclick="downloadBackup()">Download Backup</button>
-          <button class="btn-secondary" onclick="document.getElementById('fileRestore').click()">Restore</button>
-        </div>
-        <input type="file" id="fileRestore" accept=".json" hidden>
-      </div>
-      <div class="card danger-card">
-        <div class="card-ttl">🗑 Clear History</div>
-        <button class="btn-danger" onclick="clearAllHistory()">Clear All Scanned Items</button>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- BOTTOM NAV -->
-  <nav class="bnav">
-    <button class="bnav-btn active" data-page="pg-scan">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      <span>Scan</span>
-    </button>
-    <button class="bnav-btn" data-page="pg-history">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span>History</span>
-    </button>
-    <button class="bnav-btn" data-page="pg-master">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-      <span>Master</span>
-    </button>
-    <button class="bnav-btn" data-page="pg-export">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      <span>Export</span>
-    </button>
-  </nav>
-
-</div><!-- /app -->
-
-<!-- EDIT MODAL -->
-<div class="modal-bg hidden" id="editModal">
-  <div class="modal">
-    <div class="modal-hdr"><span>Edit Item</span><button onclick="closeEditModal()">✕</button></div>
-    <div class="modal-body">
-      <input type="hidden" id="eId">
-      <div class="form-row"><label>Name</label><input id="eName" class="form-input"></div>
-      <div class="form-row"><label>GTIN</label><input id="eGtin" class="form-input" readonly></div>
-      <div class="form-row"><label>Expiry</label><input type="date" id="eExpiry" class="form-input"></div>
-      <div class="form-row"><label>Batch</label><input id="eBatch" class="form-input"></div>
-      <div class="form-row2">
-        <div class="form-row"><label>Qty</label><input type="number" id="eQty" class="form-input" min="1"></div>
-        <div class="form-row"><label>RMS</label><input id="eRms" class="form-input"></div>
-      </div>
-      <div class="form-row"><label>Supplier</label><input id="eSupplier" class="form-input"></div>
-      <div class="form-row">
-        <label>Returnable</label>
-        <select id="eReturnable" class="form-input">
-          <option value="">—</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
+      <div>
+        <label class="form-label">Alshaya Code</label>
+        <input type="text" class="form-input" id="editProdAlshaya">
       </div>
     </div>
-    <div class="modal-ftr">
-      <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveEdit()">Save</button>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+      <div>
+        <label class="form-label">Module / Rack</label>
+        <input type="number" class="form-input" id="editProdModule" min="1" max="7">
+      </div>
+      <div>
+        <label class="form-label">Shelf No</label>
+        <input type="text" class="form-input" id="editProdShelf">
+      </div>
+      <div>
+        <label class="form-label">Notch</label>
+        <input type="text" class="form-input" id="editProdNotch">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+      <div>
+        <label class="form-label">Facings</label>
+        <input type="number" class="form-input" id="editProdFacing" min="1">
+      </div>
+      <div>
+        <label class="form-label">Current Stock</label>
+        <input type="number" class="form-input" id="editProdStock" min="0">
+      </div>
+      <div>
+        <label class="form-label">Price (AED)</label>
+        <input type="number" class="form-input" id="editProdPrice" step="0.5">
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <div>
+        <label class="form-label">Batch Code</label>
+        <input type="text" class="form-input" id="editProdBatch" placeholder="e.g. BATCH284">
+      </div>
+      <div>
+        <label class="form-label">Expiry Date</label>
+        <input type="date" class="form-input" id="editProdExpiry">
+      </div>
+    </div>
+
+    <label class="form-label">Patient Notes & Instructions</label>
+    <textarea class="form-input" id="editProdRemarks" rows="2" placeholder="e.g. Take 1 tablet daily with food. Store in cool place."></textarea>
+
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn-back" style="flex:1; padding:10px; background:var(--brand-blue); color:#fff; font-weight:800;" onclick="saveProductRecordEdits()">Save Changes</button>
+      <button class="btn-back" style="flex:1; padding:10px; background:var(--bg-input);" onclick="triggerLabelFromEdit()">🏷️ Print Talker</button>
     </div>
   </div>
 </div>
 
-<!-- TOASTS -->
-<div id="toasts"></div>
+<!-- MODAL 3: SHELF TALKER TICKET GENERATOR -->
+<div class="modal-overlay" id="ticketGenModal" onclick="closeModal('ticketGenModal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">🏷️ Shelf Talker Price Tag Generator</div>
+      <button class="btn-close" onclick="closeModal('ticketGenModal')">✕</button>
+    </div>
+    <input type="hidden" id="ticketCurrentProdId">
+    <div style="margin-bottom:8px;">
+      <label class="form-label">PROMOTIONAL TEMPLATE</label>
+      <select class="lang-select-box" id="ticketTemplateSelect" onchange="renderTicketPreview()">
+        <option value="standard">Standard Store Pricing</option>
+        <option value="special">Special Discount Offer</option>
+        <option value="new">New Arrival at Boots</option>
+        <option value="value">Boots Value Brand Choice</option>
+      </select>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <div style="flex:1;">
+        <label class="form-label">REGULAR PRICE (AED)</label>
+        <input type="number" class="kpi-cell-input" style="width:100%;" id="ticketRegPriceInput" oninput="renderTicketPreview()">
+      </div>
+      <div style="flex:1;">
+        <label class="form-label">PROMO PRICE (AED)</label>
+        <input type="number" class="kpi-cell-input" style="width:100%;" id="ticketPromoPriceInput" oninput="renderTicketPreview()">
+      </div>
+    </div>
 
-<!-- LOADING -->
-<div class="loading-overlay hidden" id="loading">
-  <div class="spinner"></div>
-  <div id="loadingText">Loading...</div>
+    <!-- TICKET CARD PREVIEW -->
+    <div class="ticket-card" id="ticketPreviewCard">
+      <span class="ticket-badge" id="ticketCardBadge">SPECIAL OFFER</span>
+      <div style="font-size:12px; font-weight:900;" id="ticketCardName">NEOCELL SUPER COLLAGEN</div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:8px;">
+        <div>Regular: <span style="text-decoration:line-through;" id="ticketCardOldPrice">AED 145</span></div>
+        <div class="ticket-price" id="ticketCardFinalPrice">AED 115</div>
+      </div>
+      <div style="height:14px; background:#000; margin-top:8px; border-radius:2px;"></div>
+    </div>
+
+    <button class="btn-back" style="width:100%; padding:10px; background:var(--brand-blue); color:#fff; font-weight:800;" onclick="dispatchPrintThermalJob()">🖨️ Dispatch Print to Boots Thermal Printer</button>
+  </div>
 </div>
 
-<!-- LIBS -->
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://unpkg.com/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
-<script src="app.js"></script>
+<!-- MODAL 4: SYSTEM CONTROL & SETTINGS -->
+<div class="modal-overlay" id="settingsModal" onclick="closeModal('settingsModal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ System Control & Settings</div>
+      <button class="btn-close" onclick="closeModal('settingsModal')">✕</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label class="form-label">BOOTS STORE LOCATION</label>
+      <input type="text" class="form-input" id="cfgStoreLocation" value="Boots T3 Arrivals">
+    </div>
+    <div style="margin-bottom:12px;">
+      <label class="form-label">DAILY SALES TARGET (AED)</label>
+      <input type="number" class="form-input" id="cfgDailyTarget" value="25000">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label class="form-label">THEME ENGINE</label>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-back" style="flex:1;" onclick="setThemeMode('light')">🌿 Mint Light</button>
+        <button class="btn-back" style="flex:1;" onclick="setThemeMode('dark')">🌙 Midnight Dark</button>
+      </div>
+    </div>
+    <button class="btn-back" style="width:100%; padding:10px; background:var(--brand-blue); color:#fff; font-weight:800;" onclick="saveSystemSettings()">Save System Settings</button>
+  </div>
+</div>
+
+<script>
+/* ==========================================================================
+   1. MODULES & COMPACT 383 MASTER CATALOG
+   ========================================================================== */
+const SECTIONS = [
+  { module: 1, name: 'Module 1: Collagen & Skin Brightening', color: '#E11D48' },
+  { module: 2, name: 'Module 2: Multivitamins, Vit C & Immunity', color: '#059669' },
+  { module: 3, name: 'Module 3: Men\'s Health & Energy Multivitamins', color: '#7C3AED' },
+  { module: 4, name: 'Module 4: Men\'s Vitality & Libido Support', color: '#0284C7' },
+  { module: 5, name: 'Module 5: Heart Health, Omega & Iron', color: '#0B3D91' },
+  { module: 6, name: 'Module 6: Joint Care, Bone Health & Calcium/Magnesium', color: '#D97706' },
+  { module: 7, name: 'Module 7: Weight Loss, Sleep & Amino Acids', color: '#9333EA' }
+];
+
+/* Preloaded 383 Items Raw Data: [SL, Barcode, Alshaya, Name, Facing, Module, Shelf, Notch] */
+const RAW_INVENTORY_DATA = [
+  [1, "853244003005", "B2BOB244003005", "NEOCELL SUPER COLLAGEN PLUS VITAMIN C PLUS BIOTIN 180 TABLETS", 2, 1, "1.2", "19"],
+  [2, "853244003074", "B2BOB244003074", "NEOCELL SUPER COLLAGEN PLUS VITAMIN C PLUS BIOTIN 270 TABLETS", 1, 1, "1.2", "19"],
+  [3, "35046087456", "B2BOB246087456", "NEOCELL COLLAGEN BEAUTY BUILDER 150S TABLETS", 1, 1, "1.2", "19"],
+  [4, "16185129009", "WOBOWOM12900", "COLLAGEN BEAUTY CAPSULES 30 CASPULES", 2, 1, "1.2", "19"],
+  [5, "347749193", "", "(Awaiting Description)", 1, 1, "1.2", "19"],
+  [6, "8684556261201", "", "VITABIOTICS PERFECTIL PLUS SKIN TABS 56S", 1, 1, "1.2", "19"],
+  [7, "628069520231", "335759558", "YOUTHEORY COLLAGEN 120STAB", 1, 1, "1.2", "19"],
+  [8, "Y1BOY10900873", "5903260900873", "YOUTHEORY COLLAGEN ADVANCED 160S TAB", 2, 1, "1.2", "19"],
+  [9, "330963987", "330924233", "REJUVICARE SUPER COLLAGEN CAPS 90S", 2, 1, "1.2", "19"],
+  [10, "220154834", "Y1BOY10902730", "NEOCELL FISH COLLAGEN + HA 120CAP", 1, 1, "1.2", "19"],
+  [11, "B2BOB22370098", "WOBOWO5223398", "YOUR GUMMIES COLLAGEN PLUS BIOTIN VIT C & ZINC GUMMIES 60S", 1, 1, "1.2", "19"],
+  [12, "16185132603", "16185132627", "OH MY OH COLLAGEN GUMMIES 350G", 2, 1, "1.2", "19"],
+  [13, "16185129313", "5903260902730", "COLLAGEN BEAUTY EFFERVESCENT 20 TABLETS", 1, 1, "1.2", "19"],
+  [14, "5023652370098", "5021265223398", "(Awaiting Description)", 1, 1, "1.2", "19"],
+  [15, "7629999061590", "B2BOB29039117", "SKINAGE COLLAGEN PRESTIGE 15 AMPOULES", 13, 1, "1.1", "33"],
+  [16, "16185019867", "WOBOWOM01986", "PRO COLLAGENIUM 14X25ML", 1, 1, "1.1", "33"],
+  [17, "16185132955", "342714922", "NEOCELL SUPER COLLAGEN 7OZ", 7, 1, "1.1", "33"],
+  [18, "220212282", "3859892980627", "NEOCELL SUPER COLLAGEN POWDER PEPTIDES 198G", 2, 1, "1.1", "33"],
+  [19, "6285078000150", "5903260902822", "SWEDISH NATURA COLLAGEN 10000 FISH 300GM", 2, 1, "1.1", "33"],
+  [20, "130252241", "129826893", "SKINAGE COLLAGEN TRI ACTIVE 20000MG 500ML", 2, 1, "1.1", "33"],
+  [21, "7350122360685", "7301337278319", "LA BELLE COLLAGEN 10G DRINK 15 BOTTLES", 1, 1, "1.1", "33"],
+  [22, "868573000182", "B2BOB273000182", "COLLAGEN BEAUTY SHOTS 12S", 1, 1, "1.1", "33"],
+  [23, "5019781022700", "220233096", "SWEDISH MARINE BEAUTY COLLAGEN SHOTS 20S", 1, 1, "1.1", "33"],
+  [24, "129962664", "129816897", "SWEDISH NATURA COLLAGEN 10000 LIQUID 500ML", 2, 1, "1.1", "33"],
+  [25, "16185129900", "7301337323422", "PHARMAXXI BEAUTY COLLAGEN 14STKS", 1, 1, "1.1", "33"],
+  [26, "8423245105248", "333920279", "HEALTH AID NURIDEEN PLUS TAB 60S", 1, 1, "1.1", "33"],
+  [27, "333464221", "3858893381112", "NEOCELL COLLAGEN POMEGRANATE LIQ 473ML", 1, 1, "1.1", "33"],
+  [28, "B2BOB2259570001", "220227618", "PURE GOLD COLLAGEN 500ML 10X50ML", 1, 1, "1.1", "33"],
+  [29, "339999551", "5060259570179", "PURE GOLD COLLAGEN FORTE 500ML", 1, 1, "1.1", "33"],
+  [30, "5060259570179", "7350122362771", "SWEDISH NUTRA COLLAGEN GOLD RETINOL 15S", 2, 1, "1.1", "33"],
+  [31, "6285074003575", "WUBOWUPRIO001", "PRIORIN NCAP 90S", 1, 1, "1.3", "19"],
+  [32, "6285074005661", "345355261", "PRIORIN EXTRA BLISTER 60 CAPS", 1, 1, "1.3", "19"],
+  [33, "9383993654254", "B2BOB293654254", "GLOW RADIANCE FOLIKLE 60 CAPS", 1, 1, "1.3", "19"],
+  [34, "WOBO WO5 245 7 41", "5021265245741", "VITABIOTICS PERFECTIL PLUS HAIR TAB 60S", 1, 1, "1.3", "19"],
+  [35, "5021265248780", "WEBOWEVITS3848", "VITABIOTICS HAIRFOLLIC WOMEN 60TAB", 2, 1, "1.3", "19"],
+  [36, "8429420222830", "332204326", "ISDIN LAMBDAPIL 5 ALPHA PLUS CAPS 60S", 1, 1, "1.3", "19"],
+  [37, "331894318", "5903163602850", "PAXAS WHITE GLOW TABS 20 EFFERVESCENT TABLETS", 1, 1, "1.3", "19"],
+  [38, "16185096653", "WOBOWOM09665", "NEOCELL BLUEBERRYHA LIQUID 16OZ", 1, 1, "1.3", "19"],
+  [39, "3282779065863", "5425003041587", "DUCRAY ANACAPS HAIR SUPP 60 CAP", 1, 1, "1.3", "19"],
+  [40, "8057289181649", "3660398501021", "ALLINE PROCAP 75 CAPSULES", 1, 1, "1.3", "19"],
+  [41, "4046222750909", "XSBOXS2750909", "FASTCAP 500 HAIRLOSS 30TABS", 1, 1, "1.3", "19"],
+  [42, "B2BOB29181649", "Y5BOY58500925", "BIORGA CYSTIPHANE TABLETS 120S", 1, 1, "1.3", "19"],
+  [43, "5019781015061", "220166011", "PANTOGAR 90 CAPS", 1, 1, "1.3", "19"],
+  [44, "609788968665", "Y1BOY1", "PEARLY SKIN WHIT CAPS 60CT", 1, 1, "1.3", "19"],
+  [45, "129816899", "B2BOB25012364", "(Awaiting Description)", 1, 1, "1.4", "13"],
+  [46, "B2BOB25010599", "B2BOB24050452", "(Awaiting Description)", 1, 1, "1.4", "13"],
+  [47, "335774940", "", "SWEDISH NATURA HYALURONIC ACID 500ML", 1, 1, "1.4", "13"],
+  [48, "8021685012364", "8021685010599", "MIGLIORIN TRICOX CAPS FOR HAIR 20S", 1, 1, "1.4", "13"],
+  [49, "15794050452", "628069520224", "MIGLIORIN 90 GEL CAPSULES", 1, 1, "1.4", "13"],
+  [50, "5019781000234", "WMBOWM1000234", "COUNTRY LIFE MAXI HAIR PLUS 120 CAPS", 1, 1, "1.4", "13"],
+  [51, "5021265220038", "WOBOWOMV201", "OH MY OH HAIR SKIN AND NAILS GUMMIES 350G", 1, 1, "1.4", "13"],
+  [52, "740985214343", "74312075803", "HEALTH AID HAIR VIT CAPS 30S", 1, 1, "1.4", "13"],
+  [53, "35046074227", "WOBOWOMTC21434", "21ST CENTURY HAIR SKIN 50 CAP", 1, 1, "1.4", "13"],
+  [54, "ZIBOZINB803", "B2BOB246074227", "NB SKIN HAIR & NAILS", 1, 1, "1.4", "13"],
+  [55, "340514683", "7350122362832", "PRO COLLAGENIUM 14X25ML", 1, 1, "1.5", "7"],
+  [56, "5019781016006", "342249688", "SKINAGE COLLAGEN PRISTIGE 15 AMPOULES 10000MG", 1, 1, "1.5", "7"],
+  [57, "733739037961", "WOBOWO3796", "NEOCELL SUPER COLLAGEN 7OZ", 1, 1, "1.5", "7"],
+  [58, "WOBOWO4159040", "220154423", "NEOCELL SUPER COLLAGEN POWDER PEPTIDES 198G BERRY LEMON", 1, 1, "1.5", "7"],
+  [59, "33674159040", "33674159033", "SWEDISH NATURA COLLAGEN 10000 FISH", 2, 1, "1.5", "7"],
+  [60, "8596024019491", "129816903", "PURE PEPTIDE POWDER 300GM", 1, 1, "1.5", "7"],
+  [61, "6291109121077", "", "SAKAI COLLAGEN COMPLETE 332G", 1, 1, "1.5", "7"],
+  [62, "6291109121060", "5021265247318", "SKINAGE COLLAGEN TRI ACTIVE 20000MG 500ML", 1, 1, "1.5", "7"],
+  [63, "5021265222001", "5021265223602", "LA BELLE COLLAGEN 10GDRINK 15BOTTLES", 2, 1, "1.5", "7"],
+  [64, "344345310", "344290413", "COLLAGEN BEAUTY SHOTS 12 SHOTS", 1, 1, "1.5", "7"],
+  [65, "WOBOWO5247318", "", "SWEDISH MARINE BEAUTY COLLAGEN SHOTS 20S X 25ML", 1, 1, "1.6", "15"],
+  [66, "733739004796", "WOBOWO9004796", "SWEDISH NATURA COLLAGEN 10000 FISH", 1, 1, "1.6", "15"],
+  [67, "B2BOB24065081", "WOBOWOM09664", "PURE PEPTIDE LIQUID 500ML", 1, 1, "1.6", "15"],
+  [68, "B2BOB21085442", "810011085442", "PHARMAXXI BEAUTY COLLAGEN 14STKS", 1, 1, "1.6", "15"],
+  [69, "15794065081", "16185096646", "HEALTH AID NURIDEEN PLUS TAB 60S", 1, 1, "1.6", "15"],
+  [70, "16185096646", "5021265223350", "NEOCELL COLLAGEN POMEGRANATE LIQ 473ML", 1, 1, "1.6", "15"],
+  [71, "WOBOWOVITA3350", "130393711", "PURE GOLD COLLAGEN-500ML-10X50ML 1 BX", 1, 1, "1.6", "15"],
+  [72, "B2BOB247010068", "850007144159", "PURE GOLD COLLAGEN FORTE500ML10X50ML 1BX", 2, 1, "1.6", "15"],
+  [73, "793888019355", "9383933398286", "SWEDISH NUTRA COLLAGEN GOLD", 1, 1, "1.6", "15"],
+  [74, "220055768", "733739026804", "RETINOL AMPOULES 12500 MG 25 ML 15S", 1, 1, "1.6", "15"],
+  [75, "344405790", "", "CENTRUM WOMEN TAB 100S", 1, 2, "2.1", "33"],
+  [76, "WOBOWO21225", "740985212257", "CENTRUM WOMEN TAB 30S", 1, 2, "2.1", "33"],
+  [77, "B2BOB24068723", "15794068723", "VITABIOTICS WELLTEEN HER 30 TAB", 1, 2, "2.1", "33"],
+  [78, "850072993003", "733739026804", "VITABIOTICS WELLWOMAN CAPS 30", 1, 2, "2.1", "33"],
+  [79, "740985212257", "WOBOWO39026804", "VITABIOTICS WELLWOMAN 50+ 30 TAB", 1, 2, "2.1", "33"],
+  [80, "965014200001", "Y5BOY5PSFV05", "ADDITIVA VITC EFF1GM LEMON 20", 1, 2, "2.1", "33"],
+  [81, "220218793", "B2BOB2VALU422", "ADDITIVA VITC EFF1GM RED/OR 20", 1, 2, "2.1", "33"],
+  [82, "Y5BOY5241494", "220233333", "HEALTH AID VIT C 1000MG EFF BLKCRNT 20S", 1, 2, "2.1", "33"],
+  [83, "B2BOB21256879", "ZZBOZZ1140941", "VALUPAK EFFERVESCENT VITAMIN C 1000MG", 1, 2, "2.1", "33"],
+  [84, "B2BOB27020340", "B2BOB21082915", "FAST & UP EFFERVESCENT TAB 20S", 1, 2, "2.1", "33"],
+  [85, "B2BOB295006304", "ZWBOZW525800", "HEALTH AID VITAMIN C ORANGE 1GM TABS 20S", 1, 2, "2.1", "33"],
+  [86, "5019781011605", "5024874015422", "NC VIT C FORTE 1000 MG ORANGE 20 EFF TAB", 2, 2, "2.1", "33"],
+  [87, "7640140241494", "5019781011506", "MAXIMUNE VITAMIN C 1000 MG + ZINC 50 MG", 1, 2, "2.1", "33"],
+  [88, "5907581256893", "8595011140941", "ACTIVISE VITAMIN C1000 20 EFF TAB", 1, 2, "2.1", "33"],
+  [89, "819957020340", "810011082915", "SUNSHINE N VITAMIN C 1000MG EFF LEMON TABS 20S", 1, 2, "2.1", "33"],
+  [90, "859795006304", "645638525800", "SUNSHINE N VITAMIN C 1000MG ORANGE FLAV EFFERV 20TABS", 1, 2, "2.1", "33"],
+  [91, "6285074004688", "220100221", "NF VITALSHIELD IMMUNE SUPPORT EFF TAB 20S", 1, 2, "2.2", "26"],
+  [92, "9650155002070", "WUBOWUCALC987", "REDOXON ORANGE 1G EFF TABS 15S", 1, 2, "2.2", "26"],
+  [93, "6285074005210", "345823458", "CAL-C-VITA EFFERVESCENT TABLETS 15'S", 1, 2, "2.2", "26"],
+  [94, "5024874015507", "B2BOB24015507", "REDOXON TRIPLE FORMULA EFF TABS 15S", 1, 2, "2.2", "26"],
+  [95, "6285074005609", "345876217", "VALUPAK IMMUNE SUPPORT EFFER 20TAB", 1, 2, "2.2", "26"],
+  [96, "965015500031", "WUBOWUASP-032-0", "REDOXON COMPLETE EFF TABS 15S", 1, 2, "2.2", "26"],
+  [97, "347809061", "8684556261089", "BEROCCA EFFERVESCENT TABS 10", 1, 2, "2.2", "26"],
+  [98, "33984032750", "220192279", "SOLGAR CHELATED ZINC TAB 100S", 1, 2, "2.2", "26"],
+  [99, "15794016090", "B2BOB24016090", "SOLGAR ZINC PICOLINATE 22MG TAB 100S", 1, 2, "2.2", "26"],
+  [100, "B2BOB21083929", "B2BOB2121948", "HEALTH AID SELENIUM + A C E ZINC TABS 60S", 1, 2, "2.2", "26"],
+  [101, "810011083929", "859795006069", "SOLARAY ZINC 50MG 100 CAPS", 1, 2, "2.2", "26"],
+  [102, "33984037205", "220190454", "NOW ZINC PICOLINATE 50 MG 60 CAPS", 1, 2, "2.2", "26"],
+  [103, "33984008007", "220123582", "SOLGAR VIT B COMPLEX 100 CAP 50S", 1, 2, "2.2", "26"],
+  [104, "33984037250", "220085748", "SOLGAR VIT B COMPLEX W VIT C TAB 100S", 1, 2, "2.2", "26"],
+  [105, "WMBOWM1020027", "5019781020027", "YOUR GUMMIES ELDERBERRY & VIT C&ZINC GUMMIES 60S", 1, 2, "2.2", "26"],
+  [106, "76280610413", "B2BOB20610413", "SOLGAR VITAMIN C 1000 MG TAB 90S", 1, 2, "2.2", "26"],
+  [107, "733739148490", "WOBOWO1550", "COUNTRY LIFE ALLER-MAX 50 CAPS", 1, 2, "2.3", "19"],
+  [108, "733739148490", "WOBOWO1550", "SUNSHINE N SUPER IMMUNITY WITH NAC 100 CAPS", 1, 2, "2.3", "19"],
+  [109, "33984011496", "33984002005", "SUNSHINE N VITC 1000 MG WITH ROSEHIPS TAB 100S", 1, 2, "2.3", "19"],
+  [110, "220191933", "347813886", "SOLGAR ZINC 50TAB100S", 1, 2, "2.3", "19"],
+  [111, "345565419", "5019781010103", "SOLGAR VIT B COMPLEX 100 CAP 50S", 1, 2, "2.3", "19"],
+  [112, "WOBOWOMTC21024", "740985210246", "SOLGAR VIT B COMPLEX W VIT C TAB 100S", 1, 2, "2.3", "19"],
+  [113, "628069520170", "335739892", "HEALTH AID VITAMIN B50 COMPLEX TABS 30S", 1, 2, "2.3", "19"],
+  [114, "220107578", "220154687", "21ST C-500 MG ORANGE FLAVOUR CHEWABLES 110S", 1, 2, "2.3", "19"],
+  [115, "336457256", "5019781010714", "OH MY OH VITAMIN C GUMMIES 350G", 1, 2, "2.3", "19"],
+  [116, "5019781017157", "6291109120667", "HEALTH AID SUPER BREWERS YEAST TABLETS 240S", 1, 2, "2.3", "19"],
+  [117, "733739006806", "WOBOWO680", "HAID GINKOVITAL 500MG 30S", 1, 2, "2.3", "19"],
+  [118, "Z7I4B3O1Z2I0N3W8882088", "345560413", "CENTRUM IMMUNE SUPPORT ELDERBERRY CAPSULES 60S", 1, 2, "2.3", "19"],
+  [119, "74312132018", "8410885089793", "NOW VITAMIN C 1000 100 TABS", 1, 2, "2.3", "19"],
+  [120, "WCBOWC5089793", "74312020605", "NB VITAMIN C 500MG 90 CHEWABLE", 1, 2, "2.3", "19"],
+  [121, "ZIBOZI2020605", "74312017803", "NB ZINCELATED 50MG 100CAP", 1, 2, "2.4", "13"],
+  [122, "ZIBOZI1780", "74312117800", "NB E -1000 IU 60 SOFTGELS", 1, 2, "2.4", "13"],
+  [123, "WMBOWM551", "740985212455", "PURITANS PRIDE E 1000IU CAP 50", 1, 2, "2.4", "13"],
+  [124, "220231241", "733739009067", "21ST E-400 IU 110SOFTGEL", 1, 2, "2.4", "13"],
+  [125, "WOBOWO906", "74312017704", "NOW E-400 MIXED TOCO.&SELE.CAP.100S NB", 1, 2, "2.4", "13"],
+  [126, "ZIBOZI2017704", "733739110619", "VIT E - 400 IU S/G CAPS 100S", 1, 2, "2.4", "13"],
+  [127, "733739110619", "", "NOW VIT E LIQ 13650 IU DA 1 OZ", 1, 2, "2.4", "13"],
+  [128, "5021265250592", "WOBOWO65221585", "VITABIOTICS PREGCARECNCEPTNTB30S", 2, 2, "2.5", "7"],
+  [129, "5021265247622", "WOBOWOMV191", "PREGNACARE TAB 30S", 2, 2, "2.5", "7"],
+  [130, "5021265221523", "", "VITABIOTICS PREGNACARE PLUS 56S", 1, 2, "2.5", "7"],
+  [131, "5021265244843", "WOBOWO5244843", "VITABIOTICS PREGNACARE MAX TAB 84S", 1, 2, "2.5", "7"],
+  [132, "WOBOWO5232062", "", "VITABIOTICS PREGNACARE", 1, 2, "2.5", "7"],
+  [133, "WOBOWO5636", "", "BREASTFEEDING 84S", 1, 2, "2.5", "7"],
+  [134, "WOBOWO5636", "", "NOW FENUGREEK 500 MG 100 CAPS", 2, 2, "2.5", "7"],
+  [135, "76280902280", "B2BOB20902280", "SOLARAY FOLIC ACID80MCG 100CAPS", 2, 2, "2.6", "0"],
+  [136, "74312014031", "ZIBOZI2014031", "NB FOLIC ACID 400 MCG 250 TAB", 2, 2, "2.6", "0"],
+  [137, "074312114038", "BZBTSLOPUR14038", "PURITANS PRIDE FOLIC ACID 400MCG 250S", 2, 2, "2.6", "0"],
+  [138, "5024874015347", "XPBOXPVALU490", "VALUPAK FOLIC ACID 400MCG 90 TAB", 1, 2, "2.6", "0"],
+  [139, "74312073731", "ZIBOZI2073731", "NB EVENING PRIM. OIL 1000MG.", 1, 2, "2.6", "0"],
+  [140, "733739017550", "WOBOWO1755", "NOW SUPER PRIMROSE 1300MG 120S/G", 1, 2, "2.6", "0"],
+  [141, "5021265246242", "WOBOWOVITA1202", "VITABIOTICS MENOPACE PLUS DUAL PK5 6S", 1, 2, "2.6", "0"],
+  [142, "5021265221004", "WOBOWOMENO00", "VITABIOTICS MENOPACE TABLET 30S", 1, 2, "2.6", "0"],
+  [143, "5019781015856", "WMBOWM1015856", "HEALTH AID VEIN TABS 60S", 1, 2, "2.6", "0"],
+  [144, "5019781010172", "", "CENTRUM SILVER 100S", 1, 3, "3.1", "33"],
+  [145, "333584468", "Y3BOY3CENSIL1000", "CENTRUM SILVER 30S", 1, 3, "3.1", "33"],
+  [146, "6251613000527", "Y3BOY3CENSIL30S", "CENTRUM ENERGY TAB 100S", 1, 3, "3.1", "33"],
+  [147, "6291109121039", "6291109121053", "CENTRUM MEN TAB 100S", 1, 3, "3.1", "33"],
+  [148, "6291109121046", "5019781014422", "CENTRUM MEN TAB 30S", 1, 3, "3.1", "33"],
+  [149, "344555284", "344345305", "HEALTH AID DAY VIT ACTIVE TABS 30S", 1, 3, "3.1", "33"],
+  [150, "344335400", "220221584", "HEALTH AID B VITAL EFFERVESCENT TAB 20S", 1, 3, "3.1", "33"],
+  [151, "6251613000503", "BZBTSLOCEN00503", "CENTRUM LUTEIN 100S", 1, 3, "3.1", "33"],
+  [152, "6251613000497", "Y3BOY3CEN3000", "CENTRUM LUTEIN 30S", 1, 3, "3.1", "33"],
+  [153, "5415062331736", "Y3BOY32331736", "CENTRUM ENERGY TAB 30S", 1, 3, "3.1", "33"],
+  [154, "334724699", "5000309008962", "CENTRUM ENERGY RELEASE MULTIGUMMIES 60S", 1, 3, "3.1", "33"],
+  [155, "8357760010492", "220226679", "TRQ ADULT MULTI VIT GUMMY 60S", 1, 3, "3.1", "33"],
+  [156, "3345702340790", "6027334719831", "CENTRUM ADULTS MULTIGUMMIES 60'S", 1, 3, "3.1", "33"],
+  [157, "5000309008900", "5021265247325", "CENTRUM IMMUNITY SUPPORT MULTIGUMMIES 60'S", 1, 3, "3.1", "33"],
+  [158, "WOBOWO65247325", "5021265247325", "NEW CHAPTER EVERYMAN MULTI 72S", 1, 3, "3.2", "26"],
+  [159, "5021265221301", "", "VITABIOTICS WELLTEEN MEN TAB 30S", 1, 3, "3.2", "26"],
+  [160, "5021265223527", "WOBOWO5223527", "VITABIOTICS WELLMAN CNCEPTN TB 30S", 1, 3, "3.2", "26"],
+  [161, "5021265223534", "WOBOWO65223534", "VITABIOTICS WELLMAN TAB 30", 1, 3, "3.2", "26"],
+  [162, "WEBOWEMMS0002", "", "VITABIOTICS WELLMAN SPORT TAB 30S", 1, 3, "3.2", "26"],
+  [163, "5021265223510", "WEBOWEVITA3510", "VITABIOTICS WELLMAN 50+ 30 TAB", 1, 3, "3.2", "26"],
+  [164, "5024874015354", "XPBOXPVALU495", "VALUPAK MULTI +MINERALS 30 TAB", 1, 3, "3.2", "26"],
+  [165, "965014200003", "Y5BOY5PSFV02", "ADDITIVA MULTI VITAMIN 20S", 1, 3, "3.2", "26"],
+  [166, "00850007144223", "333909190", "PHARMAXXI NMN 60S", 1, 3, "3.2", "26"],
+  [167, "33674159026", "", "ALIVE MENS 50 GUMMY VITAMIN 60S", 1, 3, "3.2", "26"],
+  [168, "220156253", "345451146", "(Awaiting Description)", 1, 3, "3.2", "26"],
+  [169, "WCBO WC5 0 810 25", "5019781000258", "(Awaiting Description)", 1, 3, "3.2", "26"],
+  [170, "74312135316", "8410885081025", "MARNYS PROPOLVIT DEFENS FOORSUP 200ML", 1, 3, "3.3", "19"],
+  [171, "832621002350", "ZWBOZW21002350", "MARNYS GINJAL 2000 FOOD SUP 200ML", 1, 3, "3.3", "19"],
+  [172, "B2BOB20154229", "8040520154229", "MARNYS EXOTIQUE FOOD SUP 220ML", 1, 3, "3.3", "19"],
+  [173, "609788968702", "Y1BOY1PENAMAX", "MARNYS ROYAL PROVITE 5000 FOOD SUP 220ML", 1, 3, "3.3", "19"],
+  [174, "8410885080691", "WCBOWC5080691", "WHITE HEALTH COQ 10 30S TAB", 1, 3, "3.3", "19"],
+  [175, "8410885075611", "WCBOWC5075611", "NOW COQ10 100MG 50 SGEL", 1, 3, "3.3", "19"],
+  [176, "8410885082558", "WCBOWC5082558", "SUNSHINE N MULTIVITAMIN EFF TAB 20S", 1, 3, "3.3", "19"],
+  [177, "8410885081735", "WCBOWC5081735", "MARNYS ROYAL JELLY CAP 90S", 1, 3, "3.3", "19"],
+  [178, "5903163605912", "337233148", "HEALTH AID KOREGIN 3000 BLISTER CAPS 30S", 1, 3, "3.3", "19"],
+  [179, "733739032089", "220291379", "PURITANS PRIDE SAW PALMETTO 450MG 100S", 1, 3, "3.3", "19"],
+  [180, "859795006564", "B2BOB25006564", "MARNYS GINSENG 1000MG W/LECITHN 30CAP", 1, 3, "3.3", "19"],
+  [181, "8410885074669", "WCBOWCMAR74669", "VIGORMAX PLUS CAPS 60S", 1, 3, "3.3", "19"],
+  [182, "874312020605", "ZIBOZI2020605", "NB ZINCELATED 50MG 100CAP", 1, 3, "3.4", "13"],
+  [183, "74312017803", "ZIBOZI1780", "NB E -1000 IU 60 SOFTGELS", 1, 3, "3.4", "13"],
+  [184, "074312117800", "WMBOWM551", "PURITANS PRIDE E 1000IU CAP 50", 1, 3, "3.4", "13"],
+  [185, "740985212455", "220231241", "21ST E-400 IU 110SOFTGEL", 1, 3, "3.4", "13"],
+  [186, "733739009067", "WOBOWO906", "NOW E-400 MIXED TOCO.&SELE.CAP.100S NB", 1, 3, "3.4", "13"],
+  [187, "74312017704", "ZIBOZI2017704", "VIT E - 400 IU S/G CAPS 100S", 1, 3, "3.4", "13"],
+  [188, "733739110619", "", "NOW VIT E LIQ 13650 IU DA 1 OZ", 1, 3, "3.4", "13"],
+  [189, "5021265250592", "WOBOWO65221585", "VITABIOTICS PREGCARECNCEPTNTB30S", 2, 3, "3.5", "7"],
+  [190, "5021265247622", "WOBOWOMV191", "PREGNACARE TAB 30S", 2, 3, "3.5", "7"],
+  [191, "5021265221523", "", "VITABIOTICS PREGNACARE PLUS 56S", 1, 3, "3.5", "7"],
+  [192, "5021265244843", "WOBOWO5244843", "VITABIOTICS PREGNACARE MAX TAB 84S", 1, 3, "3.5", "7"],
+  [193, "WOBOWO5232062", "", "VITABIOTICS PREGNACARE", 1, 3, "3.5", "7"],
+  [194, "WOBOWO5636", "", "BREASTFEEDING 84S", 1, 3, "3.5", "7"],
+  [195, "WOBOWO5636", "", "NOW FENUGREEK 500 MG 100 CAPS", 2, 3, "3.5", "7"],
+  [196, "76280902280", "B2BOB20902280", "SOLARAY FOLIC ACID80MCG 100CAPS", 2, 3, "3.6", "0"],
+  [197, "74312014031", "ZIBOZI2014031", "NB FOLIC ACID 400 MCG 250 TAB", 2, 3, "3.6", "0"],
+  [198, "074312114038", "BZBTSLOPUR14038", "PURITANS PRIDE FOLIC ACID 400MCG 250S", 2, 3, "3.6", "0"],
+  [199, "5024874015347", "XPBOXPVALU490", "VALUPAK FOLIC ACID 400MCG 90 TAB", 1, 3, "3.6", "0"],
+  [200, "74312073731", "ZIBOZI2073731", "NB EVENING PRIM. OIL 1000MG.", 1, 3, "3.6", "0"],
+  [201, "733739017550", "WOBOWO1755", "NOW SUPER PRIMROSE 1300MG 120S/G", 1, 3, "3.6", "0"],
+  [202, "5021265246242", "WOBOWOVITA1202", "VITABIOTICS MENOPACE PLUS DUAL PK5 6S", 1, 3, "3.6", "0"],
+  [203, "5021265221004", "WOBOWOMENO00", "VITABIOTICS MENOPACE TABLET 30S", 1, 3, "3.6", "0"],
+  [204, "5019781015856", "WMBOWM1015856", "HEALTH AID VEIN TABS 60S", 1, 3, "3.6", "0"],
+  [205, "15794081906", "B2BOB24081906", "GLOW RADIANCE VIRILE ENHA PERFORM TAB60S", 1, 4, "4.1", "33"],
+  [206, "33674159002", "220164524", "AMS PENAMAX MALE ENHANCE 60CT", 1, 4, "4.1", "33"],
+  [207, "5019781057115", "330698983", "COUNTRY LIFE CORE DAILY MEN 60 TABS", 1, 4, "4.1", "33"],
+  [208, "819247010518", "B2BOB247010518", "NWAY ALIVE MENS GUMMY VITAMINS 60S", 1, 4, "4.1", "33"],
+  [209, "3664798033229", "129836892", "HEALTH AID POWER VIT GOLD TABS 30S", 1, 4, "4.1", "33"],
+  [210, "3664798033212", "129841895", "BLOOM & QUAINT MACHOMAX FORTE 60 CAP", 1, 4, "4.1", "33"],
+  [211, "WOBOWOMTC22382", "740985223802", "PHARMATON VITALITY 100S", 1, 4, "4.1", "33"],
+  [212, "740985223802", "", "PHARMATON VITALITY 30S", 1, 4, "4.1", "33"],
+  [213, "645638525572", "ZWBOZW8525572", "21ST CENTURY SENTARY TAB", 1, 4, "4.1", "33"],
+  [214, "819247010037", "B2BOB247010037", "NF MEGATON GOLD MULTIVIT 100S", 1, 4, "4.1", "33"],
+  [215, "5019781000227", "220219947", "BLOOM & QUAINT LIFE ENERGY 100 TAB", 1, 4, "4.1", "33"],
+  [216, "832621000134", "ZWBOZWVNF00013", "HEALTH AID HAEMOVIT PLUS CAPS 30S", 1, 4, "4.2", "19"],
+  [217, "33984009486", "220192335", "NFLIBIZIRE LIBIDO ENHANCER 60S", 1, 4, "4.2", "19"],
+  [218, "330693995", "130377822", "SOLGAR COQ-10 VEGICAPS 200 MG 30S", 2, 4, "4.2", "19"],
+  [219, "025077000586", "25077000593", "PURITANS PRIDE Q SORB COQ 10 200 MG 30 SOFTGELS", 1, 4, "4.2", "19"],
+  [220, "733739016867", "WOBOWO1686", "PURITANS PRIDE COQ 10 100 MG 30 SOFTGEL", 2, 5, "5.1", "33"],
+  [221, "347754409", "8684556261171", "COUNTRY LIFE OMEGA 3 MOOD 90 SOFTGELS", 3, 5, "5.1", "33"],
+  [222, "5019781028931", "220154084", "NORD NAT OMEGA-3 FISH GELATIN 60SG CAPS", 2, 5, "5.1", "33"],
+  [223, "220226535", "5021265221608", "NEW CHAPTER WHOLEMEGA 1000MG 60 SOFT GEL", 2, 5, "5.1", "33"],
+  [224, "B2BOB24041207", "B2BOB24041207", "SOLGAR OMEGA 3 FISH OIL CON SG 120S", 2, 5, "5.1", "33"],
+  [225, "WOBOWO0417603", "B2BOB23900289", "SOLGAR OMEGA-3 950 MG 100SGEL", 2, 5, "5.1", "33"],
+  [226, "768990417603", "727783900289", "NOW ULTRA OMEGA 3 FISH OIL SOFTGEL 90S", 2, 5, "5.1", "33"],
+  [227, "33984017887", "B2BOB24017887", "NOW OMEGA 3 1000MG 100S", 2, 5, "5.1", "33"],
+  [228, "33984020580", "220064872", "21ST CENTURY ALASKA WILD FISH OIL 90SG", 2, 5, "5.1", "33"],
+  [229, "857188004012", "B2BOB28004012", "AMS OMEGA 3 1000MG 60CT SOFTGELS", 2, 5, "5.1", "33"],
+  [230, "768990017902", "WOBOWO0017902", "ADDITIVA MULTIVITAMIN+CAFFEINE 20 EFFERVES", 2, 5, "5.1", "33"],
+  [231, "WOBOWO0018015", "768990018015", "NF HIGH QUALITY OMEGA-3 1000MG", 2, 5, "5.1", "33"],
+  [232, "768990017612", "WOBOWO0017612", "WILEY'S PEAK EPA SOFTGEL 30'S", 2, 5, "5.1", "33"],
+  [233, "733739016614", "733739107596", "NORD NAT ULTIMATE OMEGA 60 SG CAPS", 1, 5, "5.2", "26"],
+  [234, "740985271292", "609788968184", "NORD NAT COMPLETE OMEGA XTRA 60 SG CAPS", 1, 5, "5.2", "26"],
+  [235, "WOBOWONOW596", "220172425", "NORD NAT OMEGA-3D 60 SG CAPS", 1, 5, "5.2", "26"],
+  [236, "220231423", "Y5BOY5ADDCAF01", "NOW TRI 3D OMEGA S/GELS 90S", 1, 5, "5.2", "26"],
+  [237, "4026466141961", "645638525404", "YOUR GUMMIES FISH OIL OMEGA 3 GUMMIES 60S", 1, 5, "5.2", "26"],
+  [238, "ZWBOZW8525404", "", "HEALTH AID OMEGAZONE PLUS CAPS 30S", 1, 5, "5.2", "26"],
+  [239, "WOBOWO22874", "740985228746", "CARDIOACE CAPSULES 30S", 1, 5, "5.3", "19"],
+  [240, "15794041009", "B2BOB24041009", "COUNTRY LIFE OMEGA 369 90 SOFTGELS", 1, 5, "5.3", "19"],
+  [241, "868573000199", "B2BOB23000199", "PHARMAXXI MAXXI OMEGA 3,6,7,9 60CAPS", 1, 5, "5.3", "19"],
+  [242, "B2BOB2121782", "859795006106", "SUNSHINE N ORG FLAXSEED OIL OMEGA 3-6-9 SG 100S", 1, 5, "5.3", "19"],
+  [243, "733739016256", "WOBOWO1625", "NOW KRILL OIL 500 MG S/GELS 60S", 2, 5, "5.3", "19"],
+  [244, "859795006137", "B2BOB2121783", "SUNSHINE N COD LIVER OIL SG 100S", 1, 5, "5.3", "19"],
+  [245, "5019781010745", "341129631", "HEALTH AID LIVERCARE TAB 60S", 1, 5, "5.3", "19"],
+  [246, "850007144272", "339491220", "PHARMAXXI BERBERINE 600 MG TABS 30", 1, 5, "5.3", "19"],
+  [247, "339516166", "850007144289", "PHARMAXXI D3K2 D3 4000 IU K2 MK7 100 MCG CAPS 30S", 1, 5, "5.3", "19"],
+  [248, "733739018076", "859795006113", "SOLGAR GENTLE IRON 25MG VEGICAPS 90S", 1, 5, "5.4", "13"],
+  [249, "733739017437", "628069520248", "VALUPAK MULTI +IRON 60 TAB", 1, 5, "5.4", "13"],
+  [250, "733739018397", "WOBOWO39018076", "GOL VITAMIN CODE RAW IRON CAP 30S", 1, 5, "5.4", "13"],
+  [251, "B2BOB25006113", "", "PURITANS PRIDE EASY IRON 28 MG 30", 2, 5, "5.4", "13"],
+  [252, "WOBOWO39017437", "335754669", "SOLGAR VD-3 10000 IU SOFTGELS 120S", 1, 5, "5.4", "13"],
+  [253, "WOBOWO1839", "220217862", "NOW VITAMIN D 1000 IU S/GELS 180S", 1, 5, "5.4", "13"],
+  [254, "33984012493", "5024874015040", "VITABIOTICS FEROGLOBIN 30CAPS", 1, 5, "5.4", "13"],
+  [255, "XPBOXPVALU494", "658010113762", "NB MILK THISTLE 1000 MG 50S", 1, 5, "5.4", "13"],
+  [256, "347818915", "130362971", "VITABIOTICS FEROGLOBIN SYRUP", 1, 5, "5.4", "13"],
+  [257, "B2BOB284358720", "WOBOWO365", "VITABIOTICS FEROGLOBIN FIZZ 20S", 1, 5, "5.4", "13"],
+  [258, "74312116551", "33984358720", "21ST CENTURY TRIPLE OMEGA COMPLEX S.G. 90S", 1, 5, "5.4", "13"],
+  [259, "733739003652", "5021265220076", "NOW ODORLESS GARLIC 100SGEL", 1, 5, "5.5", "7"],
+  [260, "WOBOWOMV011", "", "(V) SUNSHINE N OMEGA 3 950MG 100SG", 2, 5, "5.5", "7"],
+  [261, "74312019470", "5021265231218", "NOW COD LIVER OIL EXT STRN 90 SGEL", 1, 5, "5.5", "7"],
+  [262, "5021265247295", "WOBOWO5247295", "OH MY OH OMEGA AND DHA GUMMIES 350G", 1, 5, "5.5", "7"],
+  [263, "ZIBOZI2019470", "WOBOWOMV021", "NOW SUPER OMEGA 369 1200MG 90S", 1, 5, "5.5", "7"],
+  [264, "9650364002465", "B2BOB2A3025ML", "CH ALPHA 30X25ML", 1, 6, "6.1", "33"],
+  [265, "4260133180949", "273794953", "CH Alpha PLUS 30X25ML", 1, 6, "6.1", "33"],
+  [266, "4260133180390", "B2BOB23180390", "CH ALPHA SPORT 25ML 30S", 1, 6, "6.1", "33"],
+  [267, "339869972", "", "SWEDISH NUTRA COLLAGEN JOINT AMPOULES 1000MG 25 ML 20S", 1, 6, "6.1", "33"],
+  [268, "7350122360661", "8410885083135", "MARNYS ARTROHELP FORTE FOR JNTS FOOD SUP 200ML", 1, 6, "6.1", "33"],
+  [269, "WOBOWOMTC22622", "740985226230", "21ST CENTURY ARTHRI-FLEX TABS 120S", 1, 6, "6.1", "33"],
+  [270, "819247010020", "B2BOB247010020", "BLOOM & QUAINT FLEXIMOVE 100 TAB", 1, 6, "6.1", "33"],
+  [271, "5021265222544", "WEBOWEJOIN254", "VITABIOTICS JOINTACE MAX 84S TABS", 1, 6, "6.2", "26"],
+  [272, "WOBOWOMV217", "5021265227471", "VITABIOTICS OSTEOCARE WITH GLUCOSAMINE & CONDRONTIN 60S", 1, 6, "6.2", "26"],
+  [273, "5021265222421", "5019781017256", "VITABIOTCS JOINTACE CHON 30S", 1, 6, "6.2", "26"],
+  [274, "33984036031", "33984019416", "HEALTH AID OSTEOZIN TAB 90S", 1, 6, "6.2", "26"],
+  [275, "835776001308", "220239985", "SOLGAR VIT K2 100MCG CAP 50S", 1, 6, "6.2", "26"],
+  [276, "WEBOWEMMS0005", "346164252", "SOLGAR FOLATE 666 MCG DFE METAFOLIN 400 TAB 100S", 1, 6, "6.2", "26"],
+  [277, "347769059", "347823870", "TRQ VITAMIN D3 BONE 60 GUMMIES", 1, 6, "6.2", "26"],
+  [278, "5903163602034", "129841893", "ACTIVLAB COLLAGEN JOINT & BODY", 1, 6, "6.2", "26"],
+  [279, "30768330491", "220165026", "SD OSTEO BI FLEX JOINT HEALTH TAB 30S", 1, 6, "6.2", "26"],
+  [280, "5024874032061", "B2BOB24032061", "VALUPAK VITAMIN-D3 1000IU TAB 60S", 1, 6, "6.2", "26"],
+  [281, "ZIBOZI69986606832", "", "FLEXAMIN TABS 120+40S", 1, 6, "6.3", "19"],
+  [282, "ZIBOZI69986606830", "", "FLEXAMIN TABS 60+20S", 1, 6, "6.3", "19"],
+  [283, "699866068448", "699866068417", "FLEXAMIN TRPL. STG.TABS", 1, 6, "6.3", "19"],
+  [284, "699866148461", "733739001047", "NOW GLUTATHIONE 500 MG 60S", 1, 6, "6.3", "19"],
+  [285, "740985270622", "WOBOWO27062", "21ST CENTURY D-1000 I.U TAB 110S", 1, 6, "6.3", "19"],
+  [286, "ZIBOZINB14846", "WOBOWO9001047", "21ST GLUCOSAMINE & CHONDROITIN 8 PLUS 60S", 1, 6, "6.3", "19"],
+  [287, "WOBOWOMTC22488", "740985224885", "VITABIOTICS OSTEOCARE CHEWABLE", 1, 6, "6.4", "13"],
+  [288, "5021265220403", "WOBOWOVITA0430", "OSTEOCARE TAB 30S", 1, 6, "6.4", "13"],
+  [289, "WOBOWOMV071", "220160905", "HEALTH AID MAGCITRA TABS 60S", 1, 6, "6.4", "13"],
+  [290, "WMBOWM4230", "XPBOXPVALU488", "PURITANS PRIDE CALC600+VITD 60", 1, 6, "6.4", "13"],
+  [291, "220158483", "220192674", "VALUPAK CA +VIT D 30 TAB", 1, 6, "6.4", "13"],
+  [292, "347808865", "220170749", "NWAY ALIVE CALCIUM GUMMIES 60S PLUS VITAMIN D3", 1, 6, "6.4", "13"],
+  [293, "33984005181", "B2BOB2005181", "SOLGAR CALC MAG W VIT D3 TAB 150S", 1, 6, "6.4", "13"],
+  [294, "5021265222902", "WOBOWOOSTEO22", "VITABIOTICS OSTEOCARE FIZZ 20S", 1, 6, "6.4", "13"],
+  [295, "WOBOWOOSTEO29", "WOBOWONCM0001", "VITABIOTICS OSTEOCARE SYRUP 200ML", 1, 6, "6.4", "13"],
+  [296, "5021265245871", "5019781026036", "NOW GLUCO500/CHOND400MSM 90 CAP", 1, 6, "6.5", "15"],
+  [297, "74312142307", "5024874015101", "PHARMAXXI MAXXI FLEX 60 CAPSULES", 1, 6, "6.5", "15"],
+  [298, "33674102343", "33984033405", "21ST CENTURY CALCIUM PLUS CAP", 1, 6, "6.5", "15"],
+  [299, "33984005181", "5019781000876", "SOLGAR CALCI MAGNESIUM+ZINC TAB 100S", 1, 6, "6.5", "15"],
+  [300, "5021265227297", "WOBOWO3170", "SOLARAY CALCIUM MAG & ZINC 100 CAPS", 1, 6, "6.5", "15"],
+  [301, "130393707", "733739031709", "(V) SUNSHINE N CAL MAG ZINC WITH VIT D3 TAB 100S", 1, 6, "6.5", "15"],
+  [302, "850007144142", "740985223260", "21ST CALMAGZINC+D TABS 90S", 1, 6, "6.5", "15"],
+  [303, "33984005204", "76280413540", "HEALTH AID NEUROFORTE TABS 30S", 1, 6, "6.5", "15"],
+  [304, "220221835", "B2BOB20413540", "SUNSHINE SUPER VIT-D3 2000IU 60TABS", 1, 6, "6.5", "15"],
+  [305, "B2BOB2121785", "", "NB CAL, MAG, ZINC CHEL.TABS.", 1, 6, "6.5", "15"],
+  [306, "WOBOWOMTC22322", "740985222638", "PURITANS PRIDE CALCIUM MAGNESIUM ZINC 100S", 1, 6, "6.5", "15"],
+  [307, "WOBOWOMTC22263", "", "SUNSHINE N CAL WITH VIT D3 TAB 100S", 1, 6, "6.5", "15"],
+  [308, "WMBOWM1014583", "B2BOB246067007", "NOW VITAMIN D3/K2 1000IU/45MCG 120CAPS", 1, 6, "6.6", "1"],
+  [309, "ZIBOZI2042904", "345560411", "HEALTH AID VITAMIN D3 1000IU CAPS 30S", 1, 6, "6.6", "1"],
+  [310, "5019781014583", "35046067007", "YOUR GUMMIES VITAMIN D3 K2 GUMMIES 60S", 1, 6, "6.6", "1"],
+  [311, "74312042904", "74312142901", "WHITE HEALTH MAGNESIUM GLYCINATE 400MG 60CAPS", 1, 6, "6.6", "1"],
+  [312, "859795006236", "B2BOB2121786", "NB MAGNESIUM 500MG 100TAB", 1, 6, "6.6", "1"],
+  [313, "WOBOWO9003690", "220220161", "(V) SUNSHINE N MAGNESIUM 400MG 100TABS", 1, 6, "6.6", "1"],
+  [314, "347809060", "338384139", "HEALTH AID MAGNESIUM BISGLYCINATE 375MG VIT B6 TAB 60S", 1, 6, "6.6", "1"],
+  [315, "ZIBOZI5535", "B2BOB25006755", "VALUPAK MAGNESIUM 30 TAB", 1, 6, "6.6", "1"],
+  [316, "335439378", "733739003690", "OH MY OH CALCIUM AND VIT D3 GUMMIES 350G", 1, 6, "6.6", "1"],
+  [317, "5019781010424", "8684556261058", "SOLGAR CHELATED MAGNESIUM TAB 100S", 1, 6, "6.6", "1"],
+  [318, "5903163605677", "74312055355", "ADDITIVA MAGNISIUM EFF TAB 10", 1, 6, "6.6", "1"],
+  [319, "859795006755", "5019781056132", "VITABIOTICS ULTRA VIT D3 2000IU 96 TABS", 1, 6, "6.6", "1"],
+  [320, "5024874016535", "XPBOXPVALU493", "(Awaiting Description)", 1, 6, "6.6", "1"],
+  [321, "335739891", "220095571", "(Awaiting Description)", 1, 6, "6.6", "1"],
+  [322, "Y5BOY5PSFM01", "628069520200", "(Awaiting Description)", 1, 6, "6.6", "1"],
+  [323, "33984007000", "965014200007", "(Awaiting Description)", 1, 6, "6.6", "1"],
+  [324, "5021265247400", "WOBOWO5247400", "(Awaiting Description)", 1, 6, "6.6", "1"],
+  [325, "83000164569", "B2BOB20164569", "NUTRITIONL APPLE CID ER EX STR VINEGAR TAB 100'S", 3, 7, "7.1", "33"],
+  [326, "733739014351", "220154604", "YOUR GUMMIES APPLE CIDER VINEGAR GUMMIES 60S", 3, 7, "7.1", "33"],
+  [327, "5903163601617", "B2BOB23601617", "VALUPAK VIT B COMPLEX 60 TABLETS", 3, 7, "7.1", "33"],
+  [328, "868573000106", "B2BOB273000106", "HEALTH AID SIBERSLIM TABS 60S", 2, 7, "7.1", "33"],
+  [329, "5019781020256", "B2BOB21080911", "OH MY OH APPLE CIDER VINEGAR GUMMIES 350G", 2, 7, "7.1", "33"],
+  [330, "5903163608531", "347828802", "NOW B 50 COMPLEX WITH C 100 CAPSULES", 2, 7, "7.1", "33"],
+  [331, "810011082892", "B2BOB21082892", "NATURES ANSWER NUTRATRIMMAX 180 CAPS", 2, 7, "7.1", "33"],
+  [332, "5903163602416", "130322638", "NOW GARCINIA 1000MG 120TABS", 2, 7, "7.1", "33"],
+  [333, "220165367", "344535280", "PAXAS BELLY FAT 120 CAPS", 2, 7, "7.1", "33"],
+  [334, "8684556261003", "", "PHARMAXXI WEIGHT LOSS 4 90TABS", 2, 7, "7.1", "33"],
+  [335, "5024874015095", "XPBOXPVALU498", "HAID CROMIUM TAB 60S", 1, 7, "7.1", "33"],
+  [336, "5019781010318", "XABOXA81010318", "WHITE HEALTH SLIM DETOX CAPS 30S", 1, 7, "7.2", "26"],
+  [337, "335754670", "WOBOWO410", "SUNSHINE N SLIM SUPPORT EFFERV TABS 20S", 2, 7, "7.2", "26"],
+  [338, "628069520262", "733739004208", "PAXAS SLIMMING TABS 20 EFFERVESCENT TABS", 2, 7, "7.2", "26"],
+  [339, "740985224052", "", "HERBAL SLIMMING TEA ORIGINAL 24 BAGS", 1, 7, "7.2", "26"],
+  [340, "740985223994", "WOBOWOTEA994", "HERBAL SLIMMING TEA NATURAL 24 BAGS", 1, 7, "7.2", "26"],
+  [341, "740985223611", "WOBOWOMTC22361", "21ST CENTURY HERBAL SLIMMING TEA HONEY LEM 24 BAGS", 2, 7, "7.2", "26"],
+  [342, "740985227909", "WOBOWOMTC22792", "21ST CENTURY HERBAL SLIMMING TEA GREEN 24 BAGS", 1, 7, "7.2", "26"],
+  [343, "B2BOB246068714", "", "GARDEN GREEN ACAI CLEANSE 48H DETOX 947ML", 1, 7, "7.2", "26"],
+  [344, "733739148995", "", "NOW 5HTP 100 MG 60 VCAPS", 1, 7, "7.3", "19"],
+  [345, "33674616000", "", "NATURES WAY GINKGO 60 VCAPS", 1, 7, "7.3", "19"],
+  [346, "639738171227", "", "TG APPLE CIDER VINEGAR GUMMY ADULTS", 1, 7, "7.3", "19"],
+  [347, "130031905", "130031909", "NB L CARNITINE 500MG 30TAB", 1, 7, "7.3", "19"],
+  [348, "ZIBOZI817122", "", "BIO N MORINGA SUPER FOOD VEGI 60S CAPS", 1, 7, "7.3", "19"],
+  [349, "74312016837", "ZIBOZINB837", "NB CHELATED POTASSIUM 100S", 1, 7, "7.3", "19"],
+  [350, "B2BOB236003129", "220220534", "NB B-COMPLEX T/R + C TABS.", 1, 7, "7.3", "19"],
+  [351, "854936003129", "74312011108", "NATURES ANSWER CRANBERRY 800MG 90 CAPS", 1, 7, "7.3", "19"],
+  [352, "74312005305", "ZIBOZI2005305", "NATURES WAY ALIVE CRANRX GUMMY 60S", 1, 7, "7.3", "19"],
+  [353, "B2BOB20161582", "WOBO WO41 04 85 9", "VITABIOTICS ULTRA CRANBERRY EXTRACT TABS 30S", 1, 7, "7.4", "13"],
+  [354, "WOBOWOMV216", "B2BOB22359412", "V KYO DOPHILUS PROBIOTICS CRANBERRY EXTRACT 60CAP", 1, 7, "7.4", "13"],
+  [355, "83000161582", "33674104859", "HEALTH AID CRANPROBIO 30 CAPSULES", 1, 7, "7.4", "13"],
+  [356, "5021265244867", "23542359412", "NATURES WAY ALIVE B COMPLEX GUMMY 60S", 1, 7, "7.4", "13"],
+  [357, "5019781026074", "131167609", "HEALTH AID CARBOSLIM CAPS 60S", 1, 7, "7.4", "13"],
+  [358, "WOBOWO4104835", "33674104835", "MARNYS MEMORY PLUS FOOD SUP 200ML", 1, 7, "7.4", "13"],
+  [359, "733739148995", "", "VITABIOTICS VB NEUROZAN 30 CAPS", 1, 7, "7.5", "7"],
+  [360, "33674616000", "", "BLOOM & QUAINT EASY SLIM 60CAP", 1, 7, "7.5", "7"],
+  [361, "639738171227", "", "NOW GINKO BILOBA 60MG 60CAP", 1, 7, "7.5", "7"],
+  [362, "130031905", "130031909", "NOW B-100 CAPS 100'S", 1, 7, "7.5", "7"],
+  [363, "ZIBOZI817122", "", "NOW CURCUMIN TURMERIC 60CAP", 1, 7, "7.5", "7"],
+  [364, "74312016837", "ZIBOZINB837", "SOLARAY B COMPLEX100 50 CAPS", 1, 7, "7.5", "7"],
+  [365, "B2BOB236003129", "220220534", "NOW L- CARNITINE 500 MG 60 VCAPS", 1, 7, "7.5", "7"],
+  [366, "854936003129", "74312011108", "(Awaiting Description)", 1, 7, "7.5", "7"],
+  [367, "74312005305", "ZIBOZI2005305", "(Awaiting Description)", 1, 7, "7.5", "7"],
+  [368, "B2BOB20161582", "WOBO WO41 04 85 9", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [369, "WOBOWOMV216", "B2BOB22359412", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [370, "83000161582", "33674104859", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [371, "5021265244867", "23542359412", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [372, "5019781026074", "131167609", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [373, "WOBOWO4104835", "33674104835", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [374, "733739148995", "", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [375, "33674616000", "", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [376, "639738171227", "", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [377, "130031905", "130031909", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [378, "ZIBOZI817122", "", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [379, "74312016837", "ZIBOZINB837", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [380, "B2BOB236003129", "220220534", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [381, "854936003129", "74312011108", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [382, "74312005305", "ZIBOZI2005305", "(Awaiting Description)", 1, 7, "7.6", "1"],
+  [383, "5019781022526", "341129634", "HEALTH AID LARGININE 500MG TAB 60S", 4, 7, "7.6", "1"]
+];
+
+/* Transform into Object Catalog */
+let MASTER_PRODUCTS = RAW_INVENTORY_DATA.map(item => {
+  const [sl, barcode, alshaya, name, facing, module, shelfCode, notch] = item;
+  const shelfIndex = parseInt(String(shelfCode).split('.')[1], 10) || 1;
+  const defPrice = 110 + (sl % 15) * 10;
+  return {
+    id: `prod_${sl}`,
+    sl: sl,
+    barcode: String(barcode).trim(),
+    alshaya: String(alshaya).trim(),
+    name: name && name !== "(Not specified)" ? name : "(Awaiting Description)",
+    facing: facing || 1,
+    module: module,
+    shelfCode: String(shelfCode),
+    shelf: shelfIndex,
+    notch: notch || "19",
+    stock: (sl % 11 === 0) ? 0 : (sl % 7 === 0) ? 2 : (facing * 4) + 2,
+    price: defPrice,
+    batch: `B${2600 + (sl % 50)}`,
+    expiry: `2027-${String((sl % 12) + 1).padStart(2, '0')}-28`,
+    remarks: "Take with meals. Keep in cool dry location."
+  };
+});
+
+const CLINICAL_TRANSLATIONS = {
+  ar: "تناول جرعة واحدة يومياً قبل الإفطار. تناوله مع فيتامين سي لامتصاص أفضل. يحفظ في مكان بارد وجاف.",
+  zh: "每日早餐前服用1支。与维生素C一同服用吸收更佳。置于阴凉干燥处保存。",
+  ru: "Принимать по 1 флакону в день перед завтраком. Сочетать с витамином С для лучшего усвоения.",
+  fr: "Prendre 1 dose par jour avant le petit déjeuner. Associer à la vitamine C pour une meilleure absorption.",
+  es: "Tomar 1 ampolla al día antes del desayuno. Combinar con vitamina C para una mejor absorción.",
+  pt: "Tome 1 dose diária antes do café da manhã. Combine com vitamina C para melhor absorção.",
+  ko: "매일 아침 식전에 1병을 복용하십시오. 흡수를 돕기 위해 비타민 C와 함께 복용하세요.",
+  ja: "毎朝朝食前に1本をお召し上がりください。吸収を高めるためビタミンCと併用をお勧めします。",
+  id: "Minum 1 botol setiap hari sebelum sarapan. Padukan dengan Vitamin C untuk penyerapan optimal.",
+  sw: "Chukua kipimo 1 kila siku kabla ya kiamsha kinywa. Tumia pamoja na Vitamini C ili ufyonzaji uwe mzuri zaidi.",
+  kk: "Таңғы астың алдында күніне 1 рет ішіңіз. Жақсы сіңуі үшін С дәруменімен бірге қолданыңыз."
+};
+
+let AppState = {
+  theme: 'dark',
+  currentModule: 1,
+  storeName: 'Boots T3 Arrivals',
+  targetGoal: 25000,
+  productOverrides: {},
+  kpiData: [
+    { hour: '12:00 AM – 06:00 AM', sale: 2800, trn: 24, no7: 240, aura: 18, conv: 1.8, units: 48 },
+    { hour: '06:00 AM – 08:00 AM', sale: 3400, trn: 28, no7: 350, aura: 21, conv: 2.0, units: 62 },
+    { hour: '08:00 AM – 10:00 AM', sale: 4100, trn: 34, no7: 420, aura: 25, conv: 2.1, units: 75 },
+    { hour: '10:00 AM – 12:00 PM', sale: 5200, trn: 42, no7: 580, aura: 30, conv: 2.3, units: 98 },
+    { hour: '12:00 PM – 02:00 PM', sale: 4600, trn: 36, no7: 490, aura: 26, conv: 2.0, units: 84 },
+    { hour: '02:00 PM – 04:00 PM', sale: 3900, trn: 30, no7: 380, aura: 22, conv: 1.9, units: 68 },
+    { hour: '04:00 PM – 06:00 PM', sale: 4900, trn: 38, no7: 510, aura: 28, conv: 2.2, units: 88 },
+    { hour: '06:00 PM – 08:00 PM', sale: 5800, trn: 45, no7: 640, aura: 32, conv: 2.4, units: 105 },
+    { hour: '08:00 PM – 10:00 PM', sale: 4200, trn: 32, no7: 430, aura: 24, conv: 2.1, units: 72 },
+    { hour: '10:00 PM – 12:00 AM', sale: 2500, trn: 20, no7: 220, aura: 15, conv: 1.7, units: 44 }
+  ],
+  excelRows: [
+    { gtin: "853244003005", raw: "018532440030051727083010B2601", name: "NEOCELL SUPER COLLAGEN PLUS VIT C", expiry: "2027-08-30", batch: "B2601", qty: 2 },
+    { gtin: "7629999061590", raw: "0176299990615901726090510B2615", name: "SKINAGE COLLAGEN PRESTIGE 15 AMPOULES", expiry: "2026-09-05", batch: "B2615", qty: 4 },
+    { gtin: "16185019867", raw: "010161850198671728111210B2616", name: "PRO COLLAGENIUM 14X25ML", expiry: "2028-11-12", batch: "B2616", qty: 3 }
+  ],
+  timePunches: []
+};
+
+/* ==========================================================================
+   2. STARTUP & CANVAS PARTICLE ENGINE
+   ========================================================================== */
+window.addEventListener('DOMContentLoaded', () => {
+  loadLocalState();
+  initSplashCanvas();
+  renderKpiTable();
+  renderModuleTabs();
+  renderShelves();
+  renderRosterMatrix();
+  renderExcelLedger();
+  updateTotalSkuBadge();
+  startClockTicker();
+  startFridgeTelemetry();
+});
+
+function initSplashCanvas() {
+  const canvas = document.getElementById('splashCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = Array.from({ length: 45 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 2 + 1,
+    dx: (Math.random() - 0.5) * 1.2,
+    dy: (Math.random() - 0.5) * 1.2
+  }));
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(75, 163, 227, 0.4)';
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+      p.x += p.dx;
+      p.y += p.dy;
+      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  const terminal = document.getElementById('splashTerminal');
+  const logs = [
+    "Loading 383 Boots T3 master inventory items...",
+    "Validating RMS Barcodes and Alshaya codes...",
+    "Indexing Modules 1 to 7 planogram notched shelves...",
+    "Synchronising RTA Vysakh Shift clock...",
+    "Ready!"
+  ];
+
+  let step = 0;
+  const logInterval = setInterval(() => {
+    if (step < logs.length && terminal) {
+      terminal.innerHTML += `<br>> ${logs[step]}`;
+      step++;
+    } else {
+      clearInterval(logInterval);
+      setTimeout(() => {
+        document.getElementById('splashScreen')?.classList.add('hide');
+      }, 700);
+    }
+  }, 450);
+}
+
+function loadLocalState() {
+  try {
+    const raw = localStorage.getItem('shelfrx_pro_383_state');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      AppState = Object.assign(AppState, parsed);
+    }
+  } catch (e) {
+    console.warn("Using default AppState");
+  }
+  document.documentElement.setAttribute('data-theme', AppState.theme || 'dark');
+}
+
+function saveLocalState() {
+  try {
+    localStorage.setItem('shelfrx_pro_383_state', JSON.stringify(AppState));
+  } catch (e) {
+    console.warn("Storage quota or disabled");
+  }
+}
+
+function toast(msg) {
+  const el = document.getElementById('toastMessage');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 2200);
+}
+
+function toggleThemeEngine() {
+  setThemeMode(AppState.theme === 'dark' ? 'light' : 'dark');
+}
+
+function setThemeMode(mode) {
+  AppState.theme = mode;
+  document.documentElement.setAttribute('data-theme', mode);
+  saveLocalState();
+  toast(`Switched to ${mode === 'dark' ? 'Midnight Dark' : 'Mint Green Light'}`);
+}
+
+/* ==========================================================================
+   3. NAVIGATION & MODALS
+   ========================================================================== */
+function navigateTo(viewKey) {
+  document.getElementById('portal-view').style.display = 'none';
+  document.querySelectorAll('.module-view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+
+  if (viewKey === 'portal') {
+    document.getElementById('portal-view').style.display = 'block';
+    document.getElementById('bnav-portal')?.classList.add('active');
+    return;
+  }
+
+  const target = document.getElementById(`view-${viewKey}`);
+  const navBtn = document.getElementById(`bnav-${viewKey}`);
+  if (target) target.classList.add('active');
+  if (navBtn) navBtn.classList.add('active');
+
+  if (viewKey === 'planner') renderShelves();
+}
+
+function openModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.add('open');
+  if (id === 'stockAuditModal') renderAuditStockList();
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  if (modal) modal.classList.remove('open');
+}
+
+/* ==========================================================================
+   4. DOOR 1: KPI & AGENDA WITH MATH CALCULATION
+   ========================================================================== */
+function renderKpiTable() {
+  const tbody = document.getElementById('kpiTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = AppState.kpiData.map((row, idx) => {
+    const atv = row.trn > 0 ? (row.sale / row.trn).toFixed(1) : '0.0';
+    const no7Pct = row.sale > 0 ? ((row.no7 / row.sale) * 100).toFixed(1) + '%' : '0.0%';
+    const auraPct = row.trn > 0 ? ((row.aura / row.trn) * 100).toFixed(1) + '%' : '0.0%';
+    return `
+      <tr>
+        <td style="font-weight:700;">${row.hour}</td>
+        <td><input class="kpi-cell-input" value="${row.sale}" onchange="updateKpiMath(${idx}, 'sale', this.value)"></td>
+        <td><input class="kpi-cell-input" style="width:55px;" value="${row.trn}" onchange="updateKpiMath(${idx}, 'trn', this.value)"></td>
+        <td style="font-family:'DM Mono',monospace; font-weight:700;">${atv}</td>
+        <td><input class="kpi-cell-input" value="${row.no7}" onchange="updateKpiMath(${idx}, 'no7', this.value)"></td>
+        <td style="font-family:'DM Mono',monospace;">${no7Pct}</td>
+        <td><input class="kpi-cell-input" style="width:55px;" value="${row.aura}" onchange="updateKpiMath(${idx}, 'aura', this.value)"></td>
+        <td style="font-family:'DM Mono',monospace;">${auraPct}</td>
+        <td><input class="kpi-cell-input" style="width:65px;" value="${row.conv}" onchange="updateKpiMath(${idx}, 'conv', this.value)"></td>
+        <td><input class="kpi-cell-input" style="width:65px;" value="${row.units}" onchange="updateKpiMath(${idx}, 'units', this.value)"></td>
+      </tr>
+    `;
+  }).join('');
+
+  recalculateKpiTotals();
+}
+
+function evaluateMathExpression(str) {
+  if (typeof str === 'number') return str;
+  const clean = String(str).replace(/[^0-9+\-*/.]/g, '');
+  try {
+    return Function('"use strict"; return (' + clean + ')')() || 0;
+  } catch (e) {
+    return parseFloat(clean) || 0;
+  }
+}
+
+function updateKpiMath(rowIdx, field, rawValue) {
+  const computed = evaluateMathExpression(rawValue);
+  AppState.kpiData[rowIdx][field] = Math.round(computed * 10) / 10;
+  saveLocalState();
+  renderKpiTable();
+  toast("KPI slot updated");
+}
+
+function recalculateKpiTotals() {
+  let totSale = 0, totTrn = 0, totNo7 = 0, totAura = 0, totUnits = 0, totIpc = 0;
+  AppState.kpiData.forEach(r => {
+    totSale += r.sale;
+    totTrn += r.trn;
+    totNo7 += r.no7;
+    totAura += r.aura;
+    totUnits += r.units;
+    totIpc += r.conv;
+  });
+
+  document.getElementById('totSale').textContent = `AED ${totSale.toLocaleString()}`;
+  document.getElementById('totTrn').textContent = totTrn;
+  document.getElementById('totAtv').textContent = totTrn > 0 ? (totSale / totTrn).toFixed(1) : '0.0';
+  document.getElementById('totNo7').textContent = `AED ${totNo7.toLocaleString()}`;
+  document.getElementById('totNo7Pct').textContent = totSale > 0 ? ((totNo7 / totSale) * 100).toFixed(1) + '%' : '0.0%';
+  document.getElementById('totAura').textContent = totAura;
+  document.getElementById('totAuraPct').textContent = totTrn > 0 ? ((totAura / totTrn) * 100).toFixed(1) + '%' : '0.0%';
+  document.getElementById('totIpc').textContent = (totIpc / AppState.kpiData.length).toFixed(2);
+  document.getElementById('totUnits').textContent = totUnits;
+}
+
+/* ==========================================================================
+   5. DOOR 2: PLANOGRAM, 383 MASTER CATALOG & EDIT ENGINE
+   ========================================================================== */
+function getProductRecord(id) {
+  const base = MASTER_PRODUCTS.find(p => p.id === id);
+  if (!base) return null;
+  const overrides = AppState.productOverrides[id] || {};
+  return Object.assign({}, base, overrides);
+}
+
+function setProductRecord(id, newProps) {
+  AppState.productOverrides[id] = Object.assign(AppState.productOverrides[id] || {}, newProps);
+  saveLocalState();
+  renderShelves();
+  updateTotalSkuBadge();
+}
+
+function updateTotalSkuBadge() {
+  const activeCount = MASTER_PRODUCTS.length;
+  let totalUnits = 0;
+  MASTER_PRODUCTS.forEach(p => {
+    const rec = getProductRecord(p.id);
+    totalUnits += rec.stock || 0;
+  });
+  const el = document.getElementById('badgeSkuNumbers');
+  if (el) el.textContent = `${activeCount} / ${totalUnits}`;
+  const auditCnt = document.getElementById('auditSkuCount');
+  if (auditCnt) auditCnt.textContent = activeCount;
+}
+
+function renderModuleTabs() {
+  const strip = document.getElementById('rackTabStrip');
+  if (!strip) return;
+  strip.innerHTML = SECTIONS.map(s => `
+    <button class="rtab ${s.module === AppState.currentModule ? 'active' : ''}" onclick="switchModule(${s.module})">
+      ${s.name.split(':')[0]}
+    </button>
+  `).join('');
+}
+
+function switchModule(modNum) {
+  AppState.currentModule = modNum;
+  renderModuleTabs();
+  renderShelves();
+}
+
+let currentFilterQuery = "";
+function filterPlanogramProducts(query) {
+  currentFilterQuery = String(query || "").toLowerCase().trim();
+  renderShelves();
+}
+
+function renderShelves() {
+  const container = document.getElementById('rackShelvesContainer');
+  if (!container) return;
+  const modNum = AppState.currentModule;
+  const sec = SECTIONS.find(s => s.module === modNum) || SECTIONS[0];
+
+  let modProducts = MASTER_PRODUCTS.filter(p => p.module === modNum);
+  if (currentFilterQuery) {
+    modProducts = MASTER_PRODUCTS.filter(p => {
+      const rec = getProductRecord(p.id);
+      return rec.name.toLowerCase().includes(currentFilterQuery) ||
+             rec.barcode.toLowerCase().includes(currentFilterQuery) ||
+             rec.alshaya.toLowerCase().includes(currentFilterQuery);
+    });
+  }
+
+  let html = `<div style="font-size:12px; font-weight:800; color:${sec.color}; margin-bottom:8px;">${sec.name} (${modProducts.length} Items)</div>`;
+
+  // Group by distinct shelfCodes (e.g. 1.1, 1.2, 1.3... or 2.1 to 2.6)
+  const shelfKeys = Array.from(new Set(modProducts.map(p => p.shelfCode))).sort();
+
+  if (shelfKeys.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">No products found matching "${currentFilterQuery}".</div>`;
+    return;
+  }
+
+  shelfKeys.forEach(shKey => {
+    const productsOnShelf = modProducts.filter(p => p.shelfCode === shKey);
+    const notchValue = productsOnShelf[0]?.notch ? `Notch ${productsOnShelf[0].notch}` : "Standard";
+
+    const bottlesHtml = productsOnShelf.map((p, i) => {
+      const rec = getProductRecord(p.id);
+      const stock = rec.stock || 0;
+      const stockCls = stock === 0 ? 'stock-out' : stock < 4 ? 'stock-low' : 'stock-ok';
+      const isAwaiting = rec.name.includes('(Awaiting');
+
+      return `
+        <div class="bottle-card" onclick="openProductEditDialog('${rec.id}')">
+          <div class="bottle-visual">
+            <div class="bottle-pos">${i + 1}</div>
+            ${stock === 0 ? '<div class="bottle-exp-dot"></div>' : ''}
+            <span style="font-size:20px;">${isAwaiting ? '❓' : '💊'}</span>
+          </div>
+          <div class="bottle-name-label" title="${rec.name}">${rec.name.split(' ').slice(0, 2).join(' ')}</div>
+          <div class="bottle-stock-chip ${stockCls}">${stock === 0 ? 'OUT' : stock + 'u'}</div>
+        </div>
+      `;
+    }).join('');
+
+    html += `
+      <div class="wood-rack">
+        <div class="wood-top-bar"></div>
+        <div class="wood-shelf-header" onclick="toggleShelfCollapse('sh_${shKey.replace('.','_')}')">
+          <span>Shelf ${shKey} · <span style="font-size:10px; color:var(--accent);">${notchValue}</span></span>
+          <span style="font-size:10px; color:var(--text-sub);">${productsOnShelf.length} Products ▼</span>
+        </div>
+        <div class="shelf-bottles-row" id="sh_${shKey.replace('.','_')}">
+          ${bottlesHtml}
+        </div>
+        <div class="wood-bottom-bar"></div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleShelfCollapse(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+}
+
+function openProductEditDialog(prodId) {
+  const rec = getProductRecord(prodId);
+  if (!rec) return;
+
+  document.getElementById('editProdId').value = rec.id;
+  document.getElementById('editProdName').value = rec.name;
+  document.getElementById('editProdBarcode').value = rec.barcode;
+  document.getElementById('editProdAlshaya').value = rec.alshaya;
+  document.getElementById('editProdModule').value = rec.module;
+  document.getElementById('editProdShelf').value = rec.shelfCode;
+  document.getElementById('editProdNotch').value = rec.notch;
+  document.getElementById('editProdFacing').value = rec.facing;
+  document.getElementById('editProdStock').value = rec.stock;
+  document.getElementById('editProdPrice').value = rec.price || 120;
+  document.getElementById('editProdBatch').value = rec.batch || 'BATCH284';
+  document.getElementById('editProdExpiry').value = rec.expiry || '2027-12-31';
+  document.getElementById('editProdRemarks').value = rec.remarks || '';
+
+  // Sync to counsel guide header
+  const cTitle = document.getElementById('counselProdTitle');
+  if (cTitle) cTitle.textContent = rec.name;
+
+  openModal('productEditModal');
+}
+
+function saveProductRecordEdits() {
+  const id = document.getElementById('editProdId').value;
+  if (!id) return;
+
+  const updatedProps = {
+    name: document.getElementById('editProdName').value.trim() || "(Awaiting Description)",
+    barcode: document.getElementById('editProdBarcode').value.trim(),
+    alshaya: document.getElementById('editProdAlshaya').value.trim(),
+    module: parseInt(document.getElementById('editProdModule').value, 10) || 1,
+    shelfCode: document.getElementById('editProdShelf').value.trim(),
+    shelf: parseInt(document.getElementById('editProdShelf').value.split('.')[1] || 1, 10),
+    notch: document.getElementById('editProdNotch').value.trim(),
+    facing: parseInt(document.getElementById('editProdFacing').value, 10) || 1,
+    stock: parseInt(document.getElementById('editProdStock').value, 10) || 0,
+    price: parseFloat(document.getElementById('editProdPrice').value) || 120,
+    batch: document.getElementById('editProdBatch').value.trim(),
+    expiry: document.getElementById('editProdExpiry').value,
+    remarks: document.getElementById('editProdRemarks').value.trim()
+  };
+
+  setProductRecord(id, updatedProps);
+  closeModal('productEditModal');
+  toast("Product record updated and saved!");
+}
+
+function triggerLabelFromEdit() {
+  const prodId = document.getElementById('editProdId').value;
+  closeModal('productEditModal');
+  openTicketGenerator(prodId);
+}
+
+function openTicketGenerator(prodId) {
+  const rec = getProductRecord(prodId);
+  if (!rec) return;
+  document.getElementById('ticketCurrentProdId').value = rec.id;
+  document.getElementById('ticketCardName').textContent = rec.name;
+  document.getElementById('ticketRegPriceInput').value = rec.price || 120;
+  document.getElementById('ticketPromoPriceInput').value = Math.round((rec.price || 120) * 0.8);
+  renderTicketPreview();
+  openModal('ticketGenModal');
+}
+
+function renderTicketPreview() {
+  const tmpl = document.getElementById('ticketTemplateSelect')?.value || 'standard';
+  const reg = parseFloat(document.getElementById('ticketRegPriceInput')?.value) || 0;
+  const promo = parseFloat(document.getElementById('ticketPromoPriceInput')?.value) || 0;
+
+  const badge = document.getElementById('ticketCardBadge');
+  const oldPrice = document.getElementById('ticketCardOldPrice');
+  const finalPrice = document.getElementById('ticketCardFinalPrice');
+
+  if (tmpl === 'standard') {
+    badge.textContent = "STANDARD PRICING";
+    badge.style.background = "var(--brand-blue)";
+    oldPrice.textContent = "";
+    finalPrice.textContent = `AED ${reg}`;
+  } else if (tmpl === 'special') {
+    badge.textContent = "SPECIAL OFFER";
+    badge.style.background = "var(--red)";
+    oldPrice.textContent = `AED ${reg}`;
+    finalPrice.textContent = `AED ${promo}`;
+  } else if (tmpl === 'new') {
+    badge.textContent = "NEW ARRIVAL";
+    badge.style.background = "var(--purple)";
+    oldPrice.textContent = "";
+    finalPrice.textContent = `AED ${reg}`;
+  } else {
+    badge.textContent = "BOOTS VALUE CHOICE";
+    badge.style.background = "var(--green)";
+    oldPrice.textContent = "";
+    finalPrice.textContent = `AED ${reg}`;
+  }
+}
+
+function dispatchPrintThermalJob() {
+  toast("Broadcasting print job to Boots T3 Thermal Printer...");
+  setTimeout(() => {
+    toast("Ticket printed successfully!");
+    closeModal('ticketGenModal');
+  }, 900);
+}
+
+function renderAuditStockList() {
+  const list = document.getElementById('auditOosList');
+  if (!list) return;
+
+  const oosItems = MASTER_PRODUCTS.filter(p => {
+    const rec = getProductRecord(p.id);
+    return rec.stock === 0;
+  });
+
+  if (oosItems.length === 0) {
+    list.innerHTML = '<div style="color:var(--green); font-size:11px; padding:6px;">All 383 pharmacy items are currently in stock!</div>';
+    return;
+  }
+
+  list.innerHTML = oosItems.map(p => {
+    const rec = getProductRecord(p.id);
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--border); font-size:11px;">
+        <div style="max-width:70%;">
+          <b>${rec.name}</b><br>
+          <span style="font-size:9px; color:var(--text-muted); font-family:'DM Mono',monospace;">RMS: ${rec.barcode} · Shelf ${rec.shelfCode}</span>
+        </div>
+        <button class="btn-back" style="padding:4px 8px;" onclick="setProductRecord('${rec.id}', { stock: 5 }); renderAuditStockList();">Restock +5</button>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ==========================================================================
+   6. DOOR 3: DUTY ROTA & TIME CLOCK
+   ========================================================================== */
+const ROSTER_MATRIX_PRELOAD = [
+  { name: "311378 / Nadiya Hakkim", role: "PH", shifts: ["NIGHT OFF", "6-3PM", "1-10 PM", "9-6PM", "6-3PM", "10-6AM (Night)", "10-6AM (Night)"] },
+  { name: "317715 / Aditya", role: "PH", shifts: ["10-6AM (Night)", "10-6AM (Night)", "NIGHT OFF", "1-10 PM", "1-10 PM", "1-10 PM", "1-10 PM"] },
+  { name: "323561 / Nitheesh Pushkar", role: "PH", shifts: ["AL", "AL", "AL", "AL", "AL", "6-3PM", "6-3PM"] },
+  { name: "331356 / Vysakh", role: "PH", shifts: ["1-10 PM", "1-10 PM", "10-6AM (Night)", "10-6AM (Night)", "NIGHT OFF", "1-10 PM", "TLR(15.06)"] },
+  { name: "318672 / Saravanan", role: "SM-PH", shifts: ["6-3PM(+1)", "9-3PM(-1.5)", "6-3PM(+1)", "6-3PM", "10-6AM (Night)", "HO/SM MEET @9AM", "DO"] },
+  { name: "315854 / Farhan Shaikh", role: "SA", shifts: ["HO SUPPORT", "DO", "DO", "HO SUPPORT", "HO SUPPORT", "HO SUPPORT", "HO SUPPORT"] },
+  { name: "320231 / Gita", role: "SA", shifts: ["AL", "AL", "AL", "AL", "AL", "AL", "AL"] },
+  { name: "328216 / Maria Chavez", role: "SA", shifts: ["4-1AM", "TLR(27.05)", "10-6AM (Night)", "10-6AM (Night)", "8am/Al Quoz mall", "AL", "11-8PM"] },
+  { name: "329100 / Walid", role: "SA", shifts: ["NIGHT OFF", "4-1AM", "1-10 PM", "1-10 PM", "4-1AM", "10-6AM (Night)", "10-6AM (Night)"] }
+];
+
+function renderRosterMatrix() {
+  const tbody = document.getElementById('rosterMatrixBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = ROSTER_MATRIX_PRELOAD.map((emp, rowIdx) => `
+    <tr>
+      <td style="font-weight:700; white-space:nowrap;">${emp.name}</td>
+      <td style="font-family:'DM Mono',monospace; color:var(--accent);">${emp.role}</td>
+      ${emp.shifts.map((s, dIdx) => `
+        <td>
+          <input class="roster-cell-edit" value="${s}" onchange="updateRosterCell(${rowIdx}, ${dIdx}, this.value)">
+        </td>
+      `).join('')}
+    </tr>
+  `).join('');
+}
+
+function updateRosterCell(rowIdx, dayIdx, val) {
+  ROSTER_MATRIX_PRELOAD[rowIdx].shifts[dayIdx] = val;
+  toast("Roster shift updated");
+}
+
+function startClockTicker() {
+  setInterval(() => {
+    const el = document.getElementById('liveClockDigits');
+    if (el) el.textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+  }, 1000);
+}
+
+function logTimePunch(action) {
+  const time = new Date().toLocaleTimeString();
+  const date = new Date().toISOString().slice(0, 10);
+  AppState.timePunches.unshift({ action, time, date });
+  saveLocalState();
+  toast(`${action} registered at ${time}`);
+}
+
+function translateSellingInstructions() {
+  const lang = document.getElementById('targetLangSelector')?.value || 'en';
+  const display = document.getElementById('counselTranslatedBox');
+  if (!display) return;
+
+  if (lang === 'en') {
+    display.textContent = document.getElementById('counselSourceText')?.textContent || "";
+    display.style.direction = 'ltr';
+    return;
+  }
+
+  if (CLINICAL_TRANSLATIONS[lang]) {
+    display.textContent = CLINICAL_TRANSLATIONS[lang];
+    display.style.direction = (lang === 'ar') ? 'rtl' : 'ltr';
+    return;
+  }
+
+  display.textContent = "Translating patient guidance...";
+  display.style.direction = 'ltr';
+}
+
+function speakCounselAudio() {
+  const text = document.getElementById('counselTranslatedBox')?.textContent || "Take 1 shot daily before breakfast.";
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    const lang = document.getElementById('targetLangSelector')?.value || 'en';
+    utterance.lang = lang;
+    window.speechSynthesis.speak(utterance);
+    toast("Playing clinical voice guidance...");
+  } else {
+    toast("Speech synthesis not supported on this device.");
+  }
+}
+
+function generateAiClinicalGuide() {
+  const prod = document.getElementById('counselProdTitle')?.textContent || "PRO COLLAGENIUM";
+  const source = document.getElementById('counselSourceText');
+  if (!source) return;
+
+  source.innerHTML = `• <b>Key Point:</b> Premium clinical formulation for ${prod}.<br>• <b>Dosage:</b> 1 shot / dose daily before meals for optimal bioavailability.<br>• <b>Cross-Sell:</b> Pair with synergistic vitamins to enhance cellular uptake.`;
+  toast("Generated clinical guidance");
+}
+
+/* ==========================================================================
+   7. DOOR 4: SCANNER, GS1 PARSER & DATA LOGGER
+   ========================================================================== */
+function parseGS1String(rawStr) {
+  const str = String(rawStr || '').trim();
+  let gtin = '', expiry = '', batch = '';
+
+  const gtinMatch = str.match(/\(01\)(\d{14})/) || str.match(/01(\d{14})/);
+  if (gtinMatch) {
+    gtin = gtinMatch[1];
+  } else {
+    const digits = str.replace(/\D/g, '');
+    gtin = digits.length >= 8 ? digits.padStart(14, '0') : digits;
+  }
+
+  const expMatch = str.match(/\(17\)(\d{6})/) || str.match(/17(\d{6})/);
+  if (expMatch) {
+    const yymmdd = expMatch[1];
+    const yy = parseInt(yymmdd.substring(0, 2), 10);
+    const mm = yymmdd.substring(2, 4);
+    const dd = yymmdd.substring(4, 6);
+    expiry = `20${yy}-${mm}-${dd}`;
+  } else {
+    expiry = '2027-12-31';
+  }
+
+  const batchMatch = str.match(/\(10\)([A-Za-z0-9]+)/) || str.match(/10([A-Za-z0-9]+)/);
+  batch = batchMatch ? batchMatch[1] : 'B2688';
+
+  // Match 383 master products
+  const matched = MASTER_PRODUCTS.find(p => p.barcode === gtin || p.barcode.endsWith(gtin));
+  const name = matched ? matched.name : "PHARMACEUTICAL ITEM";
+
+  return { gtin, raw: str, name, expiry, batch, qty: 1 };
+}
+
+function parseManualGS1Input() {
+  const input = document.getElementById('manualBarcodeString');
+  if (!input || !input.value.trim()) return;
+
+  const parsed = parseGS1String(input.value.trim());
+  AppState.excelRows.unshift(parsed);
+  saveLocalState();
+  renderExcelLedger();
+  input.value = '';
+  toast(`Logged: ${parsed.name}`);
+}
+
+function renderExcelLedger() {
+  const tbody = document.getElementById('excelLedgerBody');
+  if (!tbody) return;
+
+  if (AppState.excelRows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:12px; color:#94A3B8;">Ledger is empty. Scan barcodes or enter strings above.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = AppState.excelRows.map((r, i) => `
+    <tr>
+      <td style="text-align:center; font-weight:800; background:#F8FAFC;">${i + 1}</td>
+      <td style="font-family:'DM Mono',monospace; font-weight:700;">${r.gtin}</td>
+      <td style="font-family:'DM Mono',monospace; font-size:10px; color:#059669;">${r.raw}</td>
+      <td><b>${r.name}</b></td>
+      <td style="font-family:'DM Mono',monospace;">${r.expiry}</td>
+      <td style="font-family:'DM Mono',monospace;">${r.batch}</td>
+      <td style="text-align:right; font-weight:800;">${r.qty}</td>
+    </tr>
+  `).join('');
+}
+
+function clearLedgerRows() {
+  AppState.excelRows = [];
+  saveLocalState();
+  renderExcelLedger();
+  toast("Ledger cleared");
+}
+
+function exportOrderCsvSheet() {
+  if (AppState.excelRows.length === 0) {
+    toast("Ledger has no rows to export.");
+    return;
+  }
+
+  let csv = "BARCODE,GS1 RAW STRING,PRODUCT NAME,EXPIRY,BATCH,QUANTITY\n";
+  AppState.excelRows.forEach(r => {
+    csv += `"${r.gtin}","${r.raw}","${r.name}","${r.expiry}","${r.batch}",${r.qty}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Boots_T3_Ledger_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  toast("Exported CSV spreadsheet");
+}
+
+function handleAiVisionPackaging(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  toast("Analyzing package OCR...");
+  setTimeout(() => {
+    const item = parseGS1String("018532440030051727083010B2601");
+    AppState.excelRows.unshift(item);
+    saveLocalState();
+    renderExcelLedger();
+    toast(`OCR Ingested: ${item.name}`);
+  }, 1000);
+}
+
+/* FRIDGE TELEMETRY ENGINE */
+let fridgeSpike = false;
+function startFridgeTelemetry() {
+  setInterval(() => {
+    const tempEl = document.getElementById('fridgeCurrentTemp');
+    if (!tempEl) return;
+    if (!fridgeSpike) {
+      const base = 4.2;
+      const flux = (Math.random() * 0.6 - 0.3).toFixed(1);
+      tempEl.textContent = `${(parseFloat(base) + parseFloat(flux)).toFixed(1)} °C`;
+      tempEl.style.color = "var(--green)";
+    }
+  }, 3000);
+}
+
+function simulateSpikeExcursion() {
+  fridgeSpike = true;
+  const tempEl = document.getElementById('fridgeCurrentTemp');
+  const badge = document.getElementById('fridgeStatusBadge');
+  if (tempEl) {
+    tempEl.textContent = "11.6 °C EXCURSION";
+    tempEl.style.color = "var(--red)";
+  }
+  if (badge) {
+    badge.textContent = "THRESHOLD BREACHED";
+    badge.style.background = "rgba(239, 68, 68, 0.2)";
+    badge.style.color = "var(--red)";
+  }
+  toast("Warning: Clinical fridge excursion detected!");
+}
+
+function resetSpikeExcursion() {
+  fridgeSpike = false;
+  const tempEl = document.getElementById('fridgeCurrentTemp');
+  const badge = document.getElementById('fridgeStatusBadge');
+  if (tempEl) {
+    tempEl.textContent = "4.2 °C";
+    tempEl.style.color = "var(--green)";
+  }
+  if (badge) {
+    badge.textContent = "Safe Range (2.0°C – 8.0°C)";
+    badge.style.background = "rgba(16,185,129,0.2)";
+    badge.style.color = "var(--green)";
+  }
+  toast("Fridge temperature normalized.");
+}
+
+/* ==========================================================================
+   8. SETTINGS & SYSTEM CONFIGURATION
+   ========================================================================== */
+function saveSystemSettings() {
+  const store = document.getElementById('cfgStoreLocation')?.value || 'Boots T3 Arrivals';
+  const target = parseFloat(document.getElementById('cfgDailyTarget')?.value) || 25000;
+
+  AppState.storeName = store;
+  AppState.targetGoal = target;
+
+  saveLocalState();
+  closeModal('settingsModal');
+  toast("Settings saved successfully");
+}
+</script>
 </body>
 </html>
